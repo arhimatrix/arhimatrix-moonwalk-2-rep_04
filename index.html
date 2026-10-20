@@ -1,0 +1,761 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moonwalk 2.0 · Report 04</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800&family=IBM+Plex+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Report 03 keeps Report 02's palette and type. Layout: one dark column; three scroll-driven
+   stages (Moon → site, block → dome, elements → programmes) each pin a full-frame canvas or render. */
+:root{
+  --bg:#0B0F16; --surface:#131923; --ink:#E6E4DE; --muted:#A0A7B3; --faint:#6E7582; --line:#232A37;
+  --hot:#E88A6F; --blue:#7C9CF2; --sand:#D9B596;
+  --display:'Archivo','Arial Narrow',Arial,sans-serif;
+  --body:'IBM Plex Sans','Segoe UI',Arial,sans-serif;
+  --mono:'IBM Plex Mono','Courier New',monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+html,body{background:var(--bg)}
+body{margin:0;color:var(--ink);font:300 17px/1.55 var(--body);overflow-x:hidden}
+img{max-width:100%}
+a{color:var(--blue)}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+.wrap{padding-inline:clamp(16px,4vw,48px);max-width:1280px;margin-inline:auto}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--hot)}
+.note{font:400 13px/1.5 var(--mono);color:var(--muted)}
+p{max-width:64ch}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;top:0;padding:calc(10px + env(safe-area-inset-top,0px)) clamp(16px,4vw,48px) 10px;z-index:40;display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:linear-gradient(var(--bg) 0%,rgba(11,15,22,0) 100%);font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.nav b{color:var(--ink);font-weight:600;margin-right:auto}
+.nav a{color:var(--muted);text-decoration:none}
+.nav a:hover,.nav a.on{color:var(--ink)}
+@media (max-width:700px){.nav a:not(.keep){display:none}}
+
+
+/* ---------- hero (Report 02 story) ---------- */
+.story{position:relative}
+.stage0{position:sticky; top:0; height:100vh; height:100svh; overflow:hidden}
+.story #moon{position:absolute; inset:0; width:100%; height:100%; display:block}
+.vignette{position:absolute; inset:0; background:linear-gradient(90deg, rgba(11,15,22,.7) 0%, rgba(11,15,22,.3) 36%, rgba(11,15,22,0) 58%); pointer-events:none}
+.steps0{position:relative; z-index:2; margin-top:-100vh; margin-top:-100svh; pointer-events:none}
+.step{min-height:110vh; display:flex; align-items:center}
+.step:first-child{min-height:100vh; align-items:flex-start; padding-top:clamp(96px,16vh,170px)}
+.step:last-child{min-height:110vh}
+.step{min-height:95vh}
+.step:last-child .card{transition:opacity .3s}
+.card{pointer-events:auto; max-width:440px; text-shadow:0 1px 2px rgba(0,0,0,.95),0 0 18px rgba(0,0,0,.85),0 0 42px rgba(0,0,0,.6); display:flex; flex-direction:column; gap:12px}
+.card h2{font-size:clamp(28px,3.6vw,44px);line-height:1.05;font-weight:700}
+.card p{font-size:17px}
+.title{pointer-events:auto; display:flex; flex-direction:column; gap:22px; max-width:760px; text-shadow:0 0 30px rgba(0,0,0,.7)}
+.title .eyebrow{color:var(--hot)}
+.title .lablogo{display:block; width:clamp(150px,16vw,210px); height:auto; margin-bottom:-6px; filter:drop-shadow(0 0 18px rgba(0,0,0,.6))}
+.title h1{font-size:clamp(54px,10vw,140px); font-weight:800; font-stretch:125%; line-height:.88; letter-spacing:-.01em}
+.title h1 span{display:block; font-size:.42em; font-stretch:110%; color:var(--hot); letter-spacing:.02em; margin-bottom:.25em}
+.title .lede{max-width:36ch; font-size:clamp(18px,2vw,22px); line-height:1.45}
+.title .cue{font:500 12px var(--mono); letter-spacing:.16em; color:var(--muted); margin-top:8px}
+.pin0{position:absolute; left:0; top:0; pointer-events:none; font:500 12px/1.35 var(--mono); color:var(--ink); white-space:nowrap; opacity:0; transition:opacity .35s; will-change:transform; z-index:2}
+.pin0 i{position:absolute; left:-5px; top:-5px; width:10px; height:10px; border:1.5px solid var(--hot); border-radius:50%}
+.pin0 span{position:absolute; left:14px; top:-9px; padding:2px 6px; background:rgba(11,15,22,.72)}
+.pin0 span em{font-style:normal; color:var(--hot); letter-spacing:.1em; text-transform:uppercase; display:block; font-size:10px}
+.pin0.psr i{border-color:#7C9CF2} .pin0.psr span em{color:#9fb4ff}
+.pin0.base i{width:14px; height:14px; left:-7px; top:-7px; background:var(--hot); box-shadow:0 0 0 6px rgba(232,138,111,.25)}
+.rail{position:absolute; right:clamp(12px,3vw,32px); top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:14px; z-index:3}
+.rail button{all:unset; cursor:pointer; display:flex; align-items:center; gap:10px; justify-content:flex-end; font:500 11px var(--mono); letter-spacing:.1em; color:var(--muted); text-transform:uppercase}
+.rail button span{opacity:0; transition:opacity .2s}
+.rail button:hover span,.rail button.on span{opacity:1}
+.rail button::after{content:""; width:8px; height:8px; border-radius:50%; border:1.5px solid var(--muted)}
+.rail button.on{color:var(--ink)} .rail button.on::after{background:var(--hot); border-color:var(--hot)}
+@media (max-width:640px){.rail{display:none}}
+.dive{position:absolute;inset:0;opacity:0;pointer-events:none;z-index:1;overflow:hidden}
+.dive img{width:100%;height:100%;object-fit:cover;display:block;transform-origin:62% 58%;will-change:transform}
+#dive2{z-index:2} #dive2 img{transform-origin:58% 53%}
+.legend{display:flex;align-items:center;gap:10px;font:400 11px var(--mono);color:var(--muted);margin-top:4px}
+.legend i{display:block;width:160px;height:8px;border:1px solid var(--line)}
+.coords{position:absolute; left:clamp(16px,4vw,40px); bottom:24px; font:400 12px var(--mono); color:var(--muted); letter-spacing:.06em; z-index:3}
+#basePin{z-index:3}
+#basePin i{width:11px;height:11px;left:-5.5px;top:-5.5px;border:none;border-radius:50%;background:var(--hot);box-shadow:0 0 0 4px rgba(232,138,111,.18),0 0 16px rgba(232,138,111,.9)}
+@media (prefers-reduced-motion:no-preference){#basePin i::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1.5px solid rgba(232,138,111,.55);animation:bpulse 2.6s ease-out infinite}}
+@keyframes bpulse{0%{transform:scale(.55);opacity:.9}70%{transform:scale(1.9);opacity:0}100%{transform:scale(1.9);opacity:0}}
+#basePin::before{content:"";position:absolute;left:7px;top:-0.5px;width:24px;height:1px;background:linear-gradient(90deg,rgba(232,138,111,.9),rgba(196,210,235,.25))}
+#basePin span{left:31px;top:-18px;padding:8px 14px;border-radius:12px;background:linear-gradient(165deg,rgba(52,62,82,.5),rgba(16,20,30,.66));border:1px solid rgba(196,210,235,.2);backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);box-shadow:0 12px 26px rgba(0,0,0,.42),0 2px 6px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.12),inset 0 -1px 0 rgba(0,0,0,.4)}
+#basePin span em{margin-bottom:2px}
+.secstrip{position:absolute;right:clamp(16px,4vw,48px);bottom:20px;width:min(620px,calc(100% - 540px));height:178px;z-index:3;opacity:0;pointer-events:none;
+  background:linear-gradient(168deg,rgba(44,53,72,.66),rgba(20,25,36,.78) 48%,rgba(12,16,24,.84));
+  border:1px solid rgba(196,210,235,.16);border-radius:20px;
+  box-shadow:0 22px 44px rgba(0,0,0,.5),0 3px 10px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.10),inset 0 -1px 0 rgba(0,0,0,.55),inset 0 0 46px rgba(124,156,242,.06);
+  backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3)}
+.secstrip::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(130% 95% at 16% -12%,rgba(255,255,255,.09),transparent 52%),radial-gradient(90% 70% at 86% 118%,rgba(124,156,242,.07),transparent 60%)}
+.secstrip::after{content:"";position:absolute;left:22px;right:22px;top:36px;height:1px;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(196,210,235,.22) 12%,rgba(196,210,235,.22) 88%,transparent)}
+.secstrip .sp{position:absolute;inset:9px 20px 7px;opacity:0;transition:opacity .25s}
+.secstrip svg{width:100%;height:100%;display:block}
+.secstrip text{font:400 10px var(--mono)}
+.secstrip .tt{font:500 10px var(--mono);letter-spacing:.1em}
+@media (max-width:1020px),(max-height:620px){.secstrip{display:none}}
+.btn{display:inline-block;font:500 13px var(--mono);padding:9px 14px;border:1px solid var(--ink);color:var(--ink);text-decoration:none}
+.btn:hover{background:var(--ink);color:var(--bg)}
+/* hero (old, unused) */
+.hero{min-height:100svh;display:grid;align-items:end;padding-block:120px clamp(32px,8vh,72px);position:relative}
+.hero .logo{position:absolute;top:calc(64px + env(safe-area-inset-top,0px));left:clamp(16px,4vw,48px);height:38px;opacity:.9}
+.hero h1{font-size:clamp(44px,9vw,120px);line-height:.92;font-weight:700;letter-spacing:-.015em;margin-bottom:.25em}
+.hero .sub{font-size:clamp(18px,2vw,24px);color:var(--muted);max-width:50ch;margin-bottom:28px}
+.hero .meta{display:flex;flex-wrap:wrap;gap:8px 24px;font:400 12px var(--mono);color:var(--faint)}
+.cue{margin-top:36px;font:500 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+/* stages: a tall section with a sticky full-height frame */
+.stage{position:relative}
+.stage .pin{position:sticky;top:0;height:100svh;overflow:hidden;background:#000;display:grid;grid-template-rows:1fr auto}
+.stage .vis{position:relative;min-height:0}
+.stage.img .pin{display:block}
+.stage.img .vis{position:absolute;inset:0}
+.stage.img .cap{position:absolute;left:0;right:0;bottom:0;border-top:0;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.9) 45%);padding-top:56px;grid-template-columns:1fr;gap:4px;max-width:none}
+.stage.img .cap h2{max-width:26ch}
+.stage.img .cap p{max-width:70ch;color:var(--ink);text-shadow:0 1px 10px rgba(0,0,0,.7)}
+.stage canvas.gl,.stage .layer{position:absolute;inset:0;width:100%;height:100%}
+.stage .layer img{width:100%;height:100%;object-fit:contain;display:block;background:#000}
+.stage .layer .grid{position:absolute;inset:0;display:grid;gap:8px;padding:calc(48px + env(safe-area-inset-top,0px)) clamp(16px,4vw,48px) 150px}
+.stage .layer .g2{grid-template-columns:1fr 1fr}
+.stage .layer .g3{grid-template-columns:1fr 1fr 1fr}
+.stage .layer .grid img{width:100%;height:100%;object-fit:contain;min-height:0;background:#000}
+@media (max-width:700px){.stage .layer .g2,.stage .layer .g3{grid-template-columns:1fr;grid-auto-rows:1fr}}
+.stage .layer{opacity:0;transition:opacity .5s}
+.stage .layer.on{opacity:1}
+.cap{position:relative;padding:14px clamp(16px,4vw,48px) calc(22px + env(safe-area-inset-bottom,0px));max-width:none;display:grid;grid-template-columns:auto 1fr;gap:6px 32px;align-items:baseline;border-top:1px solid var(--line);background:var(--bg)}
+.cap .eyebrow{grid-column:1/-1}
+.cap h2{max-width:22ch}
+.cap p{max-width:62ch}
+@media (max-width:800px){.cap{grid-template-columns:1fr}}
+.cap h2{font-size:clamp(22px,2.6vw,34px);line-height:1.05;font-weight:700;letter-spacing:-.01em;margin:.1em 0 0}
+.cap p{font-size:clamp(14px,1.15vw,16px);margin:0;color:var(--muted)}
+.cap .facts{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:12px;font:400 12px var(--mono);color:var(--muted)}
+.cap .facts b{color:var(--ink);font-weight:500}
+.cap .btn{pointer-events:auto;display:inline-block;margin-top:14px;font:500 13px var(--mono);padding:9px 14px;border:1px solid var(--ink);color:var(--ink);text-decoration:none}
+.cap .btn:hover{background:var(--ink);color:var(--bg)}
+.shade{display:none}
+.meter{position:absolute;left:clamp(16px,4vw,48px);top:calc(56px + env(safe-area-inset-top,0px));z-index:3;width:140px;height:2px;background:var(--line)}
+.meter i{display:block;height:100%;width:0;background:var(--hot)}
+.steps{position:absolute;right:clamp(16px,4vw,48px);top:calc(56px + env(safe-area-inset-top,0px));z-index:3;display:flex;flex-direction:column;gap:8px;font:400 12px var(--mono);color:var(--faint);text-align:right}
+.steps span.on{color:var(--ink)}
+.steps span:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.steps span.done{color:var(--muted)}
+@media (max-width:700px){.steps{display:none}}
+
+/* control panel for the block stage */
+.stage.light .pin{background:#efede8}
+.stage.light .cap{background:#000;color:var(--ink);border-top-color:#1a1a1a}
+.stage.light .cap p{color:var(--muted)}
+.stage.light .steps span{color:#8a8f98}.stage.light .steps span.on{color:#1b1e24}
+.stage.light .meter{background:#d6d2c9}
+.stage.light .panel{background:rgba(255,255,255,.82);border-color:#d6d2c9;color:#1b1e24}
+.stage.light .panel .slider,.stage.light .panel .stat{color:#5a606a}
+.stage.light .panel .slider output,.stage.light .panel .stat b,.stage.light .panel h3{color:#1b1e24}
+.stage.light .panel button{border-color:#c9c5bc;color:#1b1e24}
+.stage.light .panel button[aria-pressed=true]{background:#1b1e24;color:#fff;border-color:#1b1e24}
+.panel{position:absolute;right:clamp(16px,4vw,48px);bottom:16px;width:min(320px,calc(100% - 32px));background:var(--surface);border:1px solid var(--line);padding:14px 16px;backdrop-filter:blur(6px);z-index:5}
+.panel h3{font-size:14px;font-weight:600;margin-bottom:8px}
+.panel .slider{display:grid;grid-template-columns:92px 1fr 56px;gap:8px;align-items:center;font:400 12px var(--mono);color:var(--muted);margin-top:6px}
+.panel .slider output{color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+.panel input[type=range]{width:100%;accent-color:var(--hot)}
+.panel .row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.panel .zoom{display:flex;gap:4px;margin-left:auto}.panel .zoom button{min-width:30px;padding:6px 8px}
+.panel button{font:500 12px var(--mono);padding:6px 10px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.panel button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.panel .stat{font:400 12px var(--mono);color:var(--muted);margin-top:8px;line-height:1.5}
+.panel .stat b{color:var(--ink);font-weight:500}
+@media (max-width:700px){.panel{bottom:auto;top:calc(76px + env(safe-area-inset-top,0px));width:min(260px,calc(100% - 32px));padding:10px 12px}.panel .slider{grid-template-columns:70px 1fr 44px}.cap{max-width:100%}}
+
+
+.ee{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,1fr);background:var(--surface);border:1px solid var(--line)}
+.eeview{position:relative;height:560px;background:#0e1219}
+.eeview canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.eetag,.eestep{position:absolute;top:14px;font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.eetag{left:16px;color:var(--ink)} .eestep{right:16px;color:var(--hot)}
+.eehint{position:absolute;left:16px;right:96px;bottom:12px;font:400 12px var(--mono);color:var(--faint)}
+.eezoom{position:absolute;right:12px;bottom:10px;display:flex;gap:4px}.eezoom button{font:500 13px var(--mono);min-width:32px;padding:5px 8px;border:1px solid var(--line);background:rgba(11,15,22,.6);color:var(--ink);cursor:pointer}.eezoom button:hover{border-color:var(--muted)}
+.eeside{display:flex;flex-direction:column;max-height:560px}
+.eeopts{overflow:auto}
+.eeopts{flex:1}
+.eeopt{padding:12px 18px;border-bottom:1px solid var(--line);cursor:pointer}
+.eeopt:hover{background:rgba(255,255,255,.03)} .eeopt.on{background:#1a2130}
+.eeopt .k{font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+.eeopt h3{font-size:18px;font-weight:700;margin-bottom:6px}
+.eeopt p{font-size:13px;color:var(--muted);margin:0;display:none}
+.eeopt.on p{display:block}
+.eeopt .kv{display:none;grid-template-columns:1fr 1fr;gap:6px 18px;margin-top:10px;font:400 12.5px var(--mono);color:var(--muted)}
+.eeopt .kv b{color:var(--ink);font-weight:500}
+.eeopt.on .kv{display:grid}
+.eectl{padding:16px 20px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button,.eeplay{font:500 13px var(--mono);padding:8px 12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.eeplay{align-self:flex-start}
+@media (max-width:900px){.ee{grid-template-columns:1fr}.eeview{min-height:360px}}
+
+.pg{position:relative;padding-top:52px}
+.pgi{position:absolute;left:0;top:0;width:40px;height:40px;color:var(--hot)}
+.pgi svg{width:40px;height:40px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+/* text sections */
+.sec{padding-block:clamp(48px,10vh,120px)}
+.sec .head{display:grid;grid-template-columns:1fr 2fr;gap:24px 48px;align-items:end;margin-bottom:32px}
+.sec h2{font-size:clamp(28px,4vw,48px);line-height:1.05;font-weight:700}
+.sec .lead{font-size:clamp(17px,1.5vw,21px);color:var(--muted)}
+@media (max-width:800px){.sec .head{grid-template-columns:1fr}}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px 32px}
+.grid3 b{font-family:var(--display);font-size:17px;font-weight:700;display:block;margin-bottom:6px}
+.grid3 p{font-size:15px;color:var(--muted);margin:0}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+td:first-child{font-family:var(--mono);font-size:13px;color:var(--hot);white-space:nowrap}
+.tw{overflow-x:auto}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font:400 13px var(--mono);font-variant-numeric:tabular-nums}
+.kv b{font-weight:500;color:var(--ink)}
+.kv span{color:var(--muted)}
+.quote{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,30px);line-height:1.25;border-left:2px solid var(--hot);padding-left:18px;margin:0 0 10px;max-width:40ch}
+footer{padding-block:28px 48px;border-top:1px solid var(--line);font:400 12px var(--mono);color:var(--faint)}
+footer a{color:var(--muted)}
+
+@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} .stage .layer{transition:none} }
+
+/* ---------- Report 04 additions ---------- */
+.sec .head{grid-template-columns:1fr!important;align-items:start}
+.sec .head .lead{max-width:70ch}
+.pin0.cand.in i{width:12px;height:12px;left:-6px;top:-6px;background:var(--hot);border-color:var(--hot)}
+.pin0.cand.out i{border-color:var(--blue)}
+.pin0.cand.out span em{color:#9fb4ff}
+.pin0.ring87 span{left:0;top:0;background:none}
+.split{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:32px 48px;align-items:start}
+@media (max-width:980px){.split{grid-template-columns:1fr}}
+.fig{margin:0 0 28px}
+.fig img,.fig svg{display:block;width:100%;height:auto;border:1px solid var(--line);background:#0B0F16}
+.fig.diagram svg{border:none;background:none}
+.fig figcaption{font:400 12px/1.5 var(--mono);color:var(--muted);margin-top:10px;max-width:110ch}
+.side h3,.cols3 h3{font-size:18px;margin:22px 0 8px}
+.side p,.cols3 p{color:var(--ink);font-size:16px;margin:0}
+.cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 40px;margin-top:12px}
+@media (max-width:900px){.cols3{grid-template-columns:1fr}}
+.tbl{width:100%;border-collapse:collapse;font:400 13px var(--mono)}
+.tbl th{font-weight:500;text-align:left;color:var(--faint);padding:6px 8px;border-bottom:1px solid var(--line)}
+.tbl td{padding:8px;border-bottom:1px solid var(--line);color:var(--ink)}
+.tbl tr.in td:last-child{color:var(--hot)}
+.tbl tr.out td:last-child{color:var(--blue)}
+.tbl .tag{font-size:10px;color:var(--bg);background:var(--sand);padding:1px 5px;margin-left:6px;letter-spacing:.06em;text-transform:uppercase}
+.player{position:relative;aspect-ratio:16/9;width:100%;background:#0B0F16;border:1px solid var(--line);margin:8px 0 10px;overflow:hidden}
+.player canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:pan-y;cursor:grab}
+.player .hud{position:absolute;left:16px;top:14px;font:500 12px/1.6 var(--mono);color:var(--ink);text-shadow:0 1px 3px #000;pointer-events:none}
+.player .hud .act{color:var(--hot)}
+.player .ctl{position:absolute;left:12px;right:12px;bottom:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.player .ctl button{font:500 12px var(--mono);color:var(--ink);background:rgba(19,25,35,.85);border:1px solid var(--line);padding:7px 10px;cursor:pointer}
+.player .ctl button[aria-pressed="true"]{border-color:var(--hot);color:var(--hot)}
+.player .ctl input[type=range]{flex:1;min-width:120px;accent-color:var(--hot)}
+.note a{color:var(--blue)}
+.fig video{display:block;width:100%;max-width:100%;border:1px solid var(--line);background:#000}
+@media (max-width:700px){.player{aspect-ratio:auto}.player canvas{position:relative;height:62vw}.player .ctl{position:static;padding:8px;background:#0B0F16}.player .ctl button{padding:6px 8px;font-size:11px}.player .hud{font-size:10px;left:10px;top:8px}}
+.sources{font:400 12px/1.7 var(--mono);color:var(--muted)}
+h3.sub{font-size:20px;margin:36px 0 12px}
+.tblwrap{overflow-x:auto;margin-bottom:10px}
+.tblwrap .tbl{min-width:640px}
+.tbl.conf tr.soon td:first-child{color:var(--hot)}
+.tbl a{color:var(--blue)}
+.lit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 48px}
+@media (max-width:900px){.lit{grid-template-columns:1fr}}
+.theme h3{font-size:17px;margin:18px 0 8px;color:var(--sand)}
+.theme ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.theme li{font-size:14.5px;line-height:1.5;color:var(--ink);padding-left:12px;border-left:1px solid var(--line)}
+.theme li i{color:var(--muted)}
+.theme li a{font:400 12px var(--mono);margin-left:6px}
+.theme .rel{display:block;font:400 11.5px var(--mono);color:var(--hot);margin-top:2px}
+.gap{margin-top:36px;padding:20px 24px;border:1px solid var(--hot);max-width:900px}
+.gap h3{font-size:18px;margin:0 0 8px}
+.gap p{margin:0}
+.sources a{color:var(--muted)}
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="Sections">
+  <b>MOONWALK 2.0 · REPORT 04</b>
+  <a href="#story" class="keep">Site</a>
+  <a href="#ispace">Mission 4 zone</a>
+  <a href="#method">Method</a>
+  <a href="#pad">Pad</a>
+  <a href="#dome">Dome</a>
+  <a href="#bim4d">4D BIM</a>
+  <a href="#sim">Simulation</a>
+  <a href="#lit">Literature</a>
+  <a href="#conf">Conferences</a>
+  <a href="https://arhimatrix.github.io/arhimatrix-moonwalk-2-rep_03/" class="keep">← Report 03</a>
+</nav>
+<div class="story" id="story">
+<div class="stage0">
+<canvas id="moon" aria-label="3D Moon: it turns to the south pole and zooms in through the craters and shadowed floors to the base site on the connecting ridge"></canvas>
+<div class="vignette"></div>
+<nav class="rail" id="rail" aria-label="Site tour"></nav>
+<p class="coords" id="coords">NEAR SIDE</p>
+<div class="pin0 cand in" id="pc-cr"><i></i><span><em>C1 · 89.5°S · inside</em>Connecting Ridge</span></div><div class="pin0 cand in" id="pc-dg2"><i></i><span><em>C2 · 88.7°S · inside</em>de Gerlache Rim 2</span></div><div class="pin0 cand out" id="pc-mal"><i></i><span><em>C3 · 86.0°S · outside</em>Malapert Massif</span></div><div class="pin0 cand out" id="pc-nob1"><i></i><span><em>C4 · 85.4°S · outside</em>Nobile Rim 1</span></div><div class="pin0 ring87" id="pc-ring"><span><em>ispace Mission 4</em>87°S · 91 km from the pole</span></div><div class="pin0 base" id="basePin" style="opacity:0"><i></i><span><em>Base site</em>Connecting Ridge</span></div>
+<div class="secstrip" id="secstrip" aria-hidden="true"><div class="sp"><svg viewBox="0 0 620 152" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><text class="tt" x="0" y="11" fill="#6E7582">SECTION · DE GERLACHE → CONNECTING RIDGE → SHACKLETON · ≈ 25 KM · SCHEMATIC</text><text class="tt" x="620" y="11" fill="#E9C46A" text-anchor="end">ELEVATION</text><path d="M0,93 L52,93 L112,43 L150,49 L248,40 L325,48 L412,30 L448,100 L580,100 L612,61 L620,150 L0,150 Z" fill="rgba(110,117,130,.07)"/><path d="M0,93 L52,93 L112,43 L150,49 L248,40 L325,48 L412,30 L448,100 L580,100 L612,61" fill="none" stroke="#6E7582" stroke-width="1.5" stroke-linejoin="round"/><line x1="0" y1="52" x2="620" y2="52" stroke="#3a4150" stroke-dasharray="4 4"/><text x="618" y="49" fill="#6E7582" text-anchor="end">0 m</text><circle cx="248" cy="40" r="3" fill="#E88A6F"/><circle cx="248" cy="40" r="7" fill="none" stroke="#E88A6F" stroke-opacity=".5"/><text x="248" y="27" fill="#E88A6F" text-anchor="middle">Connecting Ridge · base site</text><text x="412" y="22" fill="#E6E4DE" text-anchor="middle">Shackleton rim ≈ +1.3 km</text><line x1="505" y1="30" x2="505" y2="100" stroke="#3a4150" stroke-dasharray="3 3"/><line x1="500" y1="30" x2="510" y2="30" stroke="#3a4150"/><line x1="500" y1="100" x2="510" y2="100" stroke="#3a4150"/><text x="511" y="68" fill="#A0A7B3">4.1 km deep</text><text x="514" y="112" fill="#7C9CF2" text-anchor="middle">floor ≈ 2.8 km below the 0 line</text><text x="4" y="88" fill="#A0A7B3">de Gerlache floor ≈ −2.5 km</text><text x="0" y="148" fill="#A0A7B3">blue = low, pale = high · LOLA = Lunar Orbiter Laser Altimeter (heights: Zuber et al. 2012)</text></svg></div><div class="sp"><svg viewBox="0 0 620 152" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><text class="tt" x="0" y="11" fill="#6E7582">SECTION · DE GERLACHE → CONNECTING RIDGE → SHACKLETON · ≈ 25 KM · SCHEMATIC</text><text class="tt" x="620" y="11" fill="#FFE08A" text-anchor="end">ILLUMINATION</text><path d="M0,93 L52,93 L112,43 L150,49 L248,40 L325,48 L412,30 L448,100 L580,100 L612,61 L620,150 L0,150 Z" fill="rgba(110,117,130,.07)"/><path d="M0,93 L52,93 L112,43 L150,49 L248,40 L325,48 L412,30 L448,100 L580,100 L612,61" fill="none" stroke="#6E7582" stroke-width="1.5" stroke-linejoin="round"/><line x1="8" y1="20" x2="118" y2="26" stroke="#E9C46A" stroke-opacity=".55"/><path d="M118,26 l-7,-3 l1,6 z" fill="#E9C46A" fill-opacity=".55"/><line x1="8" y1="32" x2="118" y2="38" stroke="#E9C46A" stroke-opacity=".55"/><path d="M118,38 l-7,-3 l1,6 z" fill="#E9C46A" fill-opacity=".55"/><line x1="8" y1="44" x2="118" y2="50" stroke="#E9C46A" stroke-opacity=".55"/><path d="M118,50 l-7,-3 l1,6 z" fill="#E9C46A" fill-opacity=".55"/><text x="8" y="64" fill="#E9C46A">Sun skims the horizon, ≤ 2° high</text><path d="M96,46 L112,43 L132,45" fill="none" stroke="#FFE08A" stroke-width="3"/><path d="M226,42 L248,40 L272,42" fill="none" stroke="#FFE08A" stroke-width="3"/><path d="M394,33 L412,30 L432,34" fill="none" stroke="#FFE08A" stroke-width="3"/><path d="M0,93 L52,93" stroke="#4a3f8f" stroke-width="4" fill="none"/><path d="M448,100 L580,100" stroke="#4a3f8f" stroke-width="4" fill="none"/><circle cx="248" cy="40" r="3" fill="#E88A6F"/><circle cx="248" cy="40" r="7" fill="none" stroke="#E88A6F" stroke-opacity=".5"/><text x="248" y="27" fill="#FFE08A" text-anchor="middle">crest lit 80–90 % of the year</text><text x="514" y="112" fill="#b39ddb" text-anchor="middle">floors 0 % · permanent shadow</text><text x="0" y="148" fill="#A0A7B3">best ridge points: 92 % lit at 2 m, 96 % at 10 m · longest night 3–5 days (Gläser et al.)</text></svg></div><div class="sp"><svg viewBox="0 0 620 152" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><text class="tt" x="0" y="11" fill="#6E7582">SECTION · DE GERLACHE → CONNECTING RIDGE → SHACKLETON · ≈ 25 KM · SCHEMATIC</text><text class="tt" x="620" y="11" fill="#4fc3f7" text-anchor="end">TEMPERATURE</text><path d="M0,93 L52,93 L112,43 L150,49 L248,40 L325,48 L412,30 L448,100 L580,100 L612,61 L620,150 L0,150 Z" fill="rgba(110,117,130,.07)"/><path d="M0,93 L52,93 L112,43 L150,49 L248,40 L325,48 L412,30 L448,100 L580,100 L612,61" fill="none" stroke="#6E7582" stroke-width="1.5" stroke-linejoin="round"/><path d="M0,93 L52,93" stroke="#4fc3f7" stroke-width="4" fill="none"/><path d="M448,100 L580,100" stroke="#4fc3f7" stroke-width="4" fill="none"/><path d="M226,42 L248,40 L272,42" fill="none" stroke="#E88A6F" stroke-width="3"/><path d="M394,33 L412,30 L432,34" fill="none" stroke="#E88A6F" stroke-width="3"/><circle cx="248" cy="40" r="3" fill="#E88A6F"/><circle cx="248" cy="40" r="7" fill="none" stroke="#E88A6F" stroke-opacity=".5"/><text x="248" y="27" fill="#E6E4DE" text-anchor="middle">base site · ice ≈ 5 km away</text><text x="412" y="22" fill="#E88A6F" text-anchor="middle">sunlit rim ≈ 220 K</text><text x="514" y="112" fill="#4fc3f7" text-anchor="middle">floor ≈ 90 K · holds water ice</text><text x="4" y="88" fill="#4fc3f7">de Gerlache floor · cold trap &lt; 110 K</text><text x="0" y="148" fill="#A0A7B3">power in the light, ice in the dark · the coldest measured places in the Solar System (Diviner)</text></svg></div></div>
+</div>
+<div class="steps0" id="steps">
+<div class="step" data-label="Report 04"><div class="wrap" style="width:100%"><div class="title">
+<img class="lablogo" src="img/srl_logo.png" width="412" height="174" alt="The Space Robotics Lab">
+<p class="eyebrow">Space Robotics Lab · Tohoku University · Report 04</p>
+<h1><span>Moonwalk 2.0</span>From the plan to the robot</h1>
+<p class="lede">Report 03 grew the block into structures. This report asks how they get built: where, in what order, and by which robot moves. It returns to the site, checks it against ispace’s Mission 4 landing zone, then turns the pad and the dome into assembly plans the Dragon can execute, and sets out how they are simulated.</p>
+<p class="cue">▼ SCROLL TO THE SITE</p>
+</div></div></div>
+<div class="step" data-label="South pole"><div class="wrap" style="width:100%"><div class="card">
+<p class="eyebrow">01 · Orientation</p><h2>Turning to the south pole</h2>
+<p>The Moon’s axis is tilted only about 1.5°. At the pole the Sun never climbs more than a few degrees: light arrives sideways, high ground can stay lit for most of the year, and low ground can stay dark for ever.</p>
+</div></div></div>
+<div class="step" data-label="The site"><div class="wrap" style="width:100%"><div class="card">
+<p class="eyebrow">01 · The site</p><h2>Connecting Ridge</h2>
+<p>Within 150 km of the pole the crater rims catch the low Sun while their floors never see it. Report 02 scored four NASA candidate regions; the pad and dome in this report are planned for Connecting Ridge, between Shackleton and de Gerlache: long sunlit periods, a shadowed floor within reach, and a shoulder flat enough for the pad.</p>
+<p><a class="btn" href="https://jsmars.sounny.com/?body=moon&lat=-89.46&lon=-99&z=4&layers=moon_opm_basemap%3A1%3A1" target="_blank" rel="noopener">Open the region in JSMARS ↗</a></p>
+</div></div></div>
+<div class="step" data-label="Elevation"><div class="wrap" style="width:100%"><div class="card">
+<p class="eyebrow">01 · Site data · elevation</p><h2>LOLA polar elevation</h2>
+<p>LOLA is the laser altimeter on NASA’s Lunar Reconnaissance Orbiter: it measured the height of the ground, and this layer is that height as colour. Blue is low — the crater floors — and pale is high — the rims. The base site sits on Connecting Ridge, the high crest between Shackleton and de Gerlache, because at the pole height is what buys sunlight. Schematic relief here; the report version uses the LOLA 5 m polar DEM through JSMARS.</p>
+<div class="legend"><i style="background:linear-gradient(90deg,#1b2a6b,#2a9d8f,#e9c46a,#f4f1ea)"></i><span>low</span><span>high</span></div>
+</div></div></div>
+<div class="step" data-label="Illumination"><div class="wrap" style="width:100%"><div class="card">
+<p class="eyebrow">01 · Site data · light</p><h2>Illumination, percent of the year</h2>
+<p>High ground near the pole stays lit most of the year; the best points on the Shackleton–de Gerlache crest — where the base site sits — exceed 80 %, and the longest nights there last only 3–5 days. Schematic from the basemap here; the report layer is the Mazarico average-illumination map.</p>
+<div class="legend"><i style="background:linear-gradient(90deg,#120a2a,#6a1b9a,#e65100,#fff176)"></i><span>0 %</span><span>&gt; 80 %</span></div>
+</div></div></div>
+<div class="step" data-label="Cold traps"><div class="wrap" style="width:100%"><div class="card">
+<p class="eyebrow">01 · Site data · cold</p><h2>Diviner cold traps</h2>
+<p>Crater floors that never see the Sun stay below 110 K — cold enough to keep water ice for billions of years. The blue marks these cold traps; Shackleton’s floor, at about 90 K, is the one next door. The base site on Connecting Ridge stays up on the warm, sunlit rim beside it, close enough to haul ice from. Schematic here; the report layer is the Diviner maximum-temperature map.</p>
+<div class="legend"><i style="background:linear-gradient(90deg,#4fc3f7,#0d47a1,#0b0f16)"></i><span>&lt; 110 K</span><span>warm</span></div>
+</div></div></div>
+<div class="step" data-label="87°S"><div class="wrap" style="width:100%"><div class="card"><p class="eyebrow">02 · Landing zone</p><h2>ispace Mission 4: the 87° line</h2><p>The landing latitude given for ispace’s Mission 4 is 87° South or higher: a circle about 91 km in radius around the pole. Connecting Ridge (89.5°S) and de Gerlache Rim 2 (88.7°S) are inside it; Malapert Massif (86.0°S) and Nobile Rim 1 (85.4°S) are outside.</p><div class="legend"><i style="background:#E88A6F;width:28px"></i><span>≥ 87°S</span><i style="background:#E88A6F;width:10px;height:10px;border-radius:50%"></i><span>inside</span><i style="border:1.5px solid #7C9CF2;width:10px;height:10px;border-radius:50%;background:none"></i><span>outside</span></div></div></div></div>
+</div>
+</div>
+
+
+<!-- ============ STAGE 2: BLOCK → DOME (interactive) ============ -->
+
+<!-- ============ 02 · ISPACE MISSION 4 LANDING ZONE ============ -->
+<section class="sec wrap" id="ispace">
+  <div class="head">
+    <p class="eyebrow">02 · Landing zone</p>
+    <h2>Do the candidate sites fall inside ispace’s Mission 4 zone?</h2>
+    <p class="lead">The professor’s question: ispace has set the Mission 4 landing latitude at 87° South or higher. Drawn on the site map, that line is a circle about 182 km across around the pole. Two of the four candidate regions lie inside it, including Connecting Ridge, the base site of these reports.</p>
+  </div>
+  <div class="split">
+    <figure class="fig"><img src="fig/ispace_polar.svg" alt="South polar map: the 87 degree south circle, about 91 km from the pole, with Connecting Ridge and de Gerlache Rim 2 inside it and Malapert Massif and Nobile Rim 1 outside it" loading="lazy"><figcaption>South pole, azimuthal equidistant projection, 0° (the Earth-facing side) at the top. Orange: the ≥ 87°S band. Filled dots: candidates inside it; open circles: outside.</figcaption></figure>
+    <div class="side">
+      <table class="tbl">
+        <thead><tr><th>Candidate</th><th>Latitude</th><th>From the pole</th><th>≥ 87°S</th></tr></thead>
+        <tbody>
+          <tr class="in"><td>C1 · Connecting Ridge <span class="tag">base site</span></td><td>89.5°S</td><td>16 km</td><td>inside</td></tr>
+          <tr class="in"><td>C2 · de Gerlache Rim 2</td><td>88.7°S</td><td>39 km</td><td>inside</td></tr>
+          <tr class="out"><td>C3 · Malapert Massif</td><td>86.0°S</td><td>121 km</td><td>outside</td></tr>
+          <tr class="out"><td>C4 · Nobile Rim 1</td><td>85.4°S</td><td>139 km</td><td>outside</td></tr>
+        </tbody>
+      </table>
+      <h3>What ispace has published</h3>
+      <p>Mission 4 (renumbered from Mission 6 in March 2026) is planned for 2029 on ispace’s larger ULTRA lander, about 3.6 m tall and about 1,000 kg dry. It is funded under Japan’s Space Strategy Fund, “high-precision landing technology in the lunar poles”. The aims are a landing near the south pole with an accuracy of 100 m or better (at least SLIM level) and more than 14 days of operation, using the low Sun on the lander’s sides. The public documents name the south polar region but give no latitude. The 87° figure is the one given to us, and it is drawn here as stated.</p>
+      <h3>A wider region than NASA’s</h3>
+      <p>NASA names 15 × 15 km regions for crewed landings. A ≥ 87°S zone is a band of about 26,000 km² around the pole. The band says where the lander may go; the 100 m accuracy is what lets it land next to a chosen pad site inside that band.</p>
+      <h3>What it means for Moonwalk</h3>
+      <p>Connecting Ridge and de Gerlache Rim 2 both qualify. Malapert, the best site for the Earth link, and Nobile Rim 1 do not. The pad and dome below are therefore planned for a site a Mission-4-class lander could serve. The pad sits outside the landing ellipse, and the robot’s first job is the drive from the lander to the pad site.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 · ASSEMBLY METHODOLOGY ============ -->
+<section class="sec wrap" id="method">
+  <div class="head">
+    <p class="eyebrow">03 · Assembly methodology</p>
+    <h2>From a list of blocks to the robot’s job list</h2>
+    <p class="lead">The drawings, the animations and the tables below are one data set. A planner in Grasshopper reads the block positions from the design model, checks every pick and placement with the Dragon’s real arm, and writes the sequence the robot executes. A step toward 4D BIM: the model gains time, and its time steps are the robot’s jobs.</p>
+  </div>
+  <figure class="fig diagram">
+    <svg viewBox="0 0 1240 300" role="img" aria-label="Six steps from the design model to the robot job list, with a feedback loop from execution back to the model">
+      <defs><marker id="ma" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#A0A7B3"/></marker></defs>
+      <g font-family="IBM Plex Mono, monospace">
+        <g transform="translate(0,40)">
+          <rect x="0" y="0" width="185" height="150" rx="2" fill="#131923" stroke="#232A37"/><text x="14" y="26" fill="#E88A6F" font-size="12">1 · TWIN</text><text x="14" y="52" fill="#E6E4DE" font-size="13">every block:</text><text x="14" y="72" fill="#E6E4DE" font-size="13">position + axes</text><text x="14" y="104" fill="#A0A7B3" font-size="11">from the</text><text x="14" y="120" fill="#A0A7B3" font-size="11">Grasshopper model</text></g>
+        <g transform="translate(210,40)">
+          <rect x="0" y="0" width="185" height="150" rx="2" fill="#131923" stroke="#232A37"/><text x="14" y="26" fill="#E88A6F" font-size="12">2 · SEQUENCE</text><text x="14" y="52" fill="#E6E4DE" font-size="13">pad: centre out</text><text x="14" y="72" fill="#E6E4DE" font-size="13">dome: rim → crown</text><text x="14" y="104" fill="#A0A7B3" font-size="11">each block next to</text><text x="14" y="120" fill="#A0A7B3" font-size="11">blocks already set</text></g>
+        <g transform="translate(420,40)">
+          <rect x="0" y="0" width="185" height="150" rx="2" fill="#131923" stroke="#232A37"/><text x="14" y="26" fill="#E88A6F" font-size="12">3 · REACH</text><text x="14" y="52" fill="#E6E4DE" font-size="13">7-joint arm IK</text><text x="14" y="72" fill="#E6E4DE" font-size="13">pre-place + place</text><text x="14" y="104" fill="#A0A7B3" font-size="11">gripper along the</text><text x="14" y="120" fill="#A0A7B3" font-size="11">block's normal</text></g>
+        <g transform="translate(630,40)">
+          <rect x="0" y="0" width="185" height="150" rx="2" fill="#131923" stroke="#232A37"/><text x="14" y="26" fill="#E88A6F" font-size="12">4 · STATIONS</text><text x="14" y="52" fill="#E6E4DE" font-size="13">where it stands,</text><text x="14" y="72" fill="#E6E4DE" font-size="13">how it gets there</text><text x="14" y="104" fill="#A0A7B3" font-size="11">stock yard · ring road</text><text x="14" y="120" fill="#A0A7B3" font-size="11">doorway · headroom</text></g>
+        <g transform="translate(840,40)">
+          <rect x="0" y="0" width="185" height="150" rx="2" fill="#131923" stroke="#232A37"/><text x="14" y="26" fill="#E88A6F" font-size="12">5 · TIMELINE</text><text x="14" y="52" fill="#E6E4DE" font-size="13">every frame:</text><text x="14" y="72" fill="#E6E4DE" font-size="13">x, y, θ + 7 joints</text><text x="14" y="104" fill="#A0A7B3" font-size="11">and where each</text><text x="14" y="120" fill="#A0A7B3" font-size="11">block is</text></g>
+        <g transform="translate(1050,40)">
+          <rect x="0" y="0" width="185" height="150" rx="2" fill="#1d1712" stroke="#E88A6F"/><text x="14" y="26" fill="#E88A6F" font-size="12">6 · JOB LIST</text><text x="14" y="52" fill="#E6E4DE" font-size="13">step → block →</text><text x="14" y="72" fill="#E6E4DE" font-size="13">pick → place</text><text x="14" y="104" fill="#A0A7B3" font-size="11">CSV + JSON</text><text x="14" y="120" fill="#A0A7B3" font-size="11">→ ROS 2 / robot</text></g>
+        <g stroke="#A0A7B3" stroke-width="1.3" marker-end="url(#ma)"><line x1="187" y1="115" x2="207" y2="115"/><line x1="397" y1="115" x2="417" y2="115"/><line x1="607" y1="115" x2="627" y2="115"/><line x1="817" y1="115" x2="837" y2="115"/><line x1="1027" y1="115" x2="1047" y2="115"/></g>
+        <path d="M1142,192 L1142,250 L92,250 L92,194" fill="none" stroke="#7C9CF2" stroke-width="1.3" stroke-dasharray="6 5" marker-end="url(#ma)"/>
+        <text x="620" y="276" fill="#7C9CF2" font-size="12" text-anchor="middle">7 · execute and measure (Isaac Sim, then the real Dragon) · blocks out of tolerance or out of reach go back into the twin · re-plan</text>
+      </g>
+    </svg>
+  </figure>
+  <div class="cols3">
+    <div><h3>The rules</h3><p>Every block is set next to blocks already in place, so each one is supported and the interlock is used from the first course. The robot always works from outside the laid area. On the pad it never drives over set pavers; in the dome it works from the open floor, through a doorway left open until last.</p></div>
+    <div><h3>The checks</h3><p>A step enters the plan only if the Dragon’s real arm, from the lab’s robot model, reaches both the pre-place and the place pose. The robot body must also fit: under the shell inside the dome, beside the stack at the stock yard. A block that fails every station is reported, not forced.</p></div>
+    <div><h3>What the robot reads</h3><p>Each row of the job list holds the step, block ID, ring or course, stock stack and level, the pick station and the place station (x, y, heading), the joint angles, and start and end time. The same file drives the animation, Isaac Sim, and through ROS 2 the robot.</p></div>
+  </div>
+</section>
+
+<!-- ============ 04 · PAD ============ -->
+<section class="sec wrap" id="pad">
+  <div class="head">
+    <p class="eyebrow">04 · Assembly plan · pad</p>
+    <h2>Pad: 283 pavers, centre out</h2>
+    <p class="lead">The Report 02 paver at the lab scale of 0.66 (0.229 m across, 0.132 m thick, about 14 kg in sintered regolith), laid as a 4 m hexagonal pad. One Dragon picks each paver from a six-stack yard on the −X side, drives the ring road to a station outside the laid area, and sets the paver centre-first, ring by ring. Robot time 6.0 h; distance driven 4.9 km.</p>
+  </div>
+  <figure class="fig"><img src="fig/pad_plan.svg" alt="Technical drawing of the pad assembly plan: every paver numbered with its build step, coloured from the first ring to the last; stock yard, ring road and three example robot stations with their drives" loading="lazy"><figcaption>Assembly plan, plan view. Numbers are build steps, the robot’s job numbers. Dashed outlines: the robot at its place station for three example steps, with its drive for that step.</figcaption></figure>
+  <div class="player" id="padPlayer" data-plan="data/pad_plan.json">
+    <canvas aria-label="3D animation of the Dragon building the pad"></canvas>
+    <div class="hud"><div class="act"></div><div class="cnt"></div><div class="clk"></div></div>
+    <div class="ctl"><button class="play" aria-pressed="true">Pause</button><button data-mode="detail" aria-pressed="true">First 3 pavers · 6×</button><button data-mode="lapse" aria-pressed="false">Whole pad · 2 min</button><button class="ghost" aria-pressed="true">Target outline</button><input type="range" min="0" max="1000" value="0" aria-label="Scrub through the build"></div>
+  </div>
+  <p class="note">3D animation from the same plan: real Dragon kinematics, every joint angle from the job list. Drag to turn the view; Ctrl + scroll to zoom. Downloads: <a href="data/pad_assembly_plan.csv">job list (CSV)</a> · <a href="data/pad_plan.json">plan + timeline (JSON)</a> · <a href="media/moonwalk_r04_pad_720.mp4">video (MP4)</a></p>
+  <figure class="fig"><video controls preload="metadata" playsinline src="media/moonwalk_r04_pad_720.mp4" aria-label="One-minute video of the pad build"></video><figcaption>One-minute video of the same plan: the first three pavers in detail, then the whole pad as a time-lapse.</figcaption></figure>
+</section>
+
+<!-- ============ 05 · DOME ============ -->
+<section class="sec wrap" id="dome">
+  <div class="head">
+    <p class="eyebrow">05 · Assembly plan · dome</p>
+    <h2>Dome: built from inside, through its own doorway</h2>
+    <p class="lead">The Report 02 shell (ShellA, 211 tilt blocks on a 54-block plinth ring) at the size one Dragon can build: 0.6×, 4.8 m across and 1.65 m high. A doorway 0.95 m wide and 0.98 m high stays open on the stock-yard side, with a gap in the plinth. It is the opening where the airlock plug-in from Report 03 docks. The robot drives in through it for every block, sets the courses rim-first from inside holding each block by its inner face, and drives out at the end. All 194 blocks of the shell around the doorway are set; robot time 3.1 h.</p>
+  </div>
+  <figure class="fig"><img src="fig/dome_plan.svg" alt="Technical drawing of the dome assembly plan: every block numbered with its build step and coloured by course from the rim to the crown; doorway blocks outlined in red; stock yard and example robot stations and drives" loading="lazy"><figcaption>Assembly plan, plan view. Course colours run from the rim (blue) to the crown (orange). Red dashed: the doorway, left open. Thin lines: the robot’s collision-free drive for three example steps.</figcaption></figure>
+  <figure class="fig"><img src="fig/dome_section.svg" alt="Section through the dome along the doorway axis: blocks coloured by course with their build steps, the Dragon inside setting a block near the crown with its arm reach circle, and the doorway on the left" loading="lazy"><figcaption>Section through the doorway. The Dragon stands inside on the open floor and reaches the upper courses from below.</figcaption></figure>
+  <div class="player" id="domePlayer" data-plan="data/dome_plan.json" data-plinth="data/dome_plinth.json">
+    <canvas aria-label="3D animation of the Dragon building the dome from inside"></canvas>
+    <div class="hud"><div class="act"></div><div class="cnt"></div><div class="clk"></div></div>
+    <div class="ctl"><button class="play" aria-pressed="true">Pause</button><button data-mode="detail" aria-pressed="true">First 3 blocks · 6×</button><button data-mode="lapse" aria-pressed="false">Whole dome · 2 min</button><button class="ghost" aria-pressed="true">Target outline</button><input type="range" min="0" max="1000" value="0" aria-label="Scrub through the build"></div>
+  </div>
+  <p class="note">Same player as the pad. Downloads: <a href="data/dome_assembly_plan.csv">job list (CSV)</a> · <a href="data/dome_plan.json">plan + timeline (JSON)</a> · <a href="media/moonwalk_r04_dome_720.mp4">video (MP4)</a></p>
+  <figure class="fig"><video controls preload="metadata" playsinline src="media/moonwalk_r04_dome_720.mp4" aria-label="One-minute video of the dome build"></video><figcaption>One-minute video: the first three blocks in detail, then the whole dome as a time-lapse, every drive through the doorway.</figcaption></figure>
+  <div class="cols3">
+    <div><h3>No contact with set blocks</h3><p>Every pose of the robot is checked against everything standing at that moment: the plinth, every block already set, and the stock stacks. The check covers the body, the wheels, both legs, the arm and the block it carries. Drives are searched on a 5 cm, 15° grid of forward, reverse and turn-in-place moves, with every turn checked in 5° steps, so the robot only enters and leaves through the doorway. An independent check of the finished plan, frame by frame over 111,886 drive frames, finds no overlap with any block deeper than 4 cm, within the 5 cm grid. These 21 frames are mostly the first moments of backing away from a block just set.</p></div>
+    <div><h3>Why 0.6× and a doorway</h3><p>The Dragon is 2.2 m long and must stand under the shell. At 0.43× it fits under only the lower courses. At 0.6× it reaches the crown from inside. The doorway has to clear the robot’s height in its driving posture (0.86 m), so it cuts through the lower courses on one side: 22 blocks are left out. Closing it from outside does not work, because the deeper doorway blocks are out of reach from beyond the rim, so the opening becomes the entrance.</p></div>
+    <div><h3>What is still open</h3><p>The courses over the doorway span it as a short arch and need a temporary frame while they close over it. Bruun et al. (2021) used a second robot as that support. At 0.6× a block weighs 30–51 kg in sintered regolith, above the ≈ 12 kg per limb expected on the Moon: lighter, hollow blocks or two limbs per block close that gap. The arm’s own approach to each block is checked by reach, not yet for contact with neighbouring blocks.</p></div>
+  </div>
+</section>
+
+<!-- ============ 4D BIM AND ROBOT OPERATIONS ============ -->
+<section class="sec wrap" id="bim4d">
+  <div class="head">
+    <p class="eyebrow">06 · 4D BIM and robot operations</p>
+    <h2>One model that is also the robot’s schedule</h2>
+    <p class="lead">The usual 4D BIM links building elements to tasks on a calendar, for people to read. Here the task list is executed by a robot, so each task carries what the robot needs: which block, which stack, where to stand, which arm posture, and when. Each step in the job list is a 4D task. The animations above are those tasks played in time.</p>
+  </div>
+  <div class="split">
+    <figure class="fig"><img src="fig/pad_4d.svg" alt="4D schedule of the pad: blocks set against robot time, the area coloured by ring from the first ring to the last; 283 blocks in about 6 hours" loading="lazy"><figcaption>Pad: blocks set against robot time. The colour shows which ring is being laid. The slope is the build rate: about 47 pavers an hour, nearly constant, because the ring road keeps every drive about the same length.</figcaption></figure>
+    <figure class="fig"><img src="fig/dome_4d.svg" alt="4D schedule of the dome: blocks set against robot time, coloured by course from rim to crown, with the doorway closure at the end" loading="lazy"><figcaption>Dome: blocks set against robot time, course by course from the rim to the crown. About 63 blocks an hour, nearly constant: every block costs one drive in through the doorway and one out.</figcaption></figure>
+  </div>
+  <h3 class="sub">How the plan maps onto IFC</h3>
+  <div class="tblwrap"><table class="tbl">
+    <thead><tr><th>Moonwalk plan</th><th>IFC 4 entity</th><th>Carries</th></tr></thead>
+    <tbody>
+      <tr><td>block</td><td>IfcBuildingElementPart, in an IfcElementAssembly (pad, dome)</td><td>geometry, block type, mass; property set with ring or course, zone, build step</td></tr>
+      <tr><td>job (one row of the job list)</td><td>IfcTask + IfcTaskTime</td><td>step number, scheduled start and finish, predecessor (the previous step)</td></tr>
+      <tr><td>job ↔ block</td><td>IfcRelAssignsToProduct</td><td>which block a job sets</td></tr>
+      <tr><td>Dragon</td><td>IfcConstructionEquipmentResource</td><td>robot ID, assigned to every job (IfcRelAssignsToResource)</td></tr>
+      <tr><td>stock stack, station</td><td>IfcAnnotation / IfcVirtualElement with placement</td><td>pick and place poses (x, y, heading), stack and level</td></tr>
+      <tr><td>arm posture</td><td>property set on the task</td><td>7 joint angles at pre-place and place; full timeline in JSON beside the model</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">A proposed mapping, not yet exported: the planner writes CSV and JSON today. Writing the same data as IFC (for example with IfcOpenShell) lets any BIM viewer play the 4D schedule and lets the site twin record each block as planned, set, or measured.</p>
+
+  <h3 class="sub">The robot operations framework</h3>
+  <figure class="fig diagram">
+    <svg viewBox="0 0 1240 380" role="img" aria-label="Robot operations framework in five layers, from the BIM model through mission and task planning, motion, execution in simulation or on the robot, to sensing that updates the as-built twin">
+      <defs><marker id="mc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#A0A7B3"/></marker></defs>
+      <g font-family="IBM Plex Mono, monospace" font-size="12">
+        <g transform="translate(0,0)"><rect width="1240" height="58" fill="#131923" stroke="#232A37"/><text x="16" y="24" fill="#E88A6F">L1 · MODEL</text><text x="200" y="24" fill="#E6E4DE" font-size="13">BIM / digital twin: block family, structures, site (Rhino · Grasshopper → IFC)</text><text x="200" y="44" fill="#A0A7B3" font-size="11">what is to be built · status of every block: planned · set · measured</text></g>
+        <g transform="translate(0,72)"><rect width="1240" height="58" fill="#1d1712" stroke="#E88A6F"/><text x="16" y="24" fill="#E88A6F">L2 · MISSION</text><text x="200" y="24" fill="#E6E4DE" font-size="13">assembly planner: sequence, reach, stations, collision-free routes → job list (4D)</text><text x="200" y="44" fill="#A0A7B3" font-size="11">Grasshopper component · re-plans when L5 reports a change</text></g>
+        <g transform="translate(0,144)"><rect width="1240" height="58" fill="#131923" stroke="#232A37"/><text x="16" y="24" fill="#E88A6F">L3 · TASK</text><text x="200" y="24" fill="#E6E4DE" font-size="13">one job at a time: drive → pick → carry → place → release, with checks between</text><text x="200" y="44" fill="#A0A7B3" font-size="11">ROS 2 node reads the job list; waits for confirmation (grasp IR sensor, pose check) before the next step</text></g>
+        <g transform="translate(0,216)"><rect width="1240" height="58" fill="#131923" stroke="#232A37"/><text x="16" y="24" fill="#E88A6F">L4 · MOTION</text><text x="200" y="24" fill="#E6E4DE" font-size="13">Motion Stack: joint manager, kinematic manager, wheel commands</text><text x="200" y="44" fill="#A0A7B3" font-size="11">same commands to Isaac Sim (virtual robot) or to the Dragon</text></g>
+        <g transform="translate(0,288)"><rect width="1240" height="58" fill="#131923" stroke="#232A37"/><text x="16" y="24" fill="#E88A6F">L5 · EXECUTE + SENSE</text><text x="200" y="24" fill="#E6E4DE" font-size="13">Isaac Sim (physics) → lab Dragon → lunar robot · camera / fiducial measures each set block</text><text x="200" y="44" fill="#A0A7B3" font-size="11">deviation beyond tolerance → block flagged in L1, plan re-run from L2</text></g>
+        <path d="M1225,316 L1232,316 L1232,30 L1243,30" fill="none" stroke="#7C9CF2" stroke-dasharray="5 4"/>
+      </g>
+    </svg>
+  </figure>
+  <div class="cols3">
+    <div><h3>What changes from 4D BIM</h3><p>A 4D BIM schedule is usually checked by a planner and carried out by a crew who adapt on site. A robot does not adapt unless told to. So every task must already be feasible: reachable, collision-free, and with the block supported by blocks set before it (dry stacking, no mortar). The planner proves this for every step before the step enters the schedule.</p></div>
+    <div><h3>Dry stacking as a rule</h3><p>With no joints to hold a block, the order is part of the structure. The pad goes centre-out, so each paver interlocks with set neighbours. The dome goes course by course, so every block rests on the course below. The arch over the doorway needs a temporary support while its courses close over it. The robot never touches a set block: routes and stations are checked against everything already standing.</p></div>
+    <div><h3>Closing the loop</h3><p>The twin keeps three states per block: planned, set, measured. When a block is measured off its pose, or a step fails in simulation, the block goes back to planned and L2 re-plans the rest from that state. The same loop runs in Isaac Sim today and on the robot later.</p></div>
+  </div>
+</section>
+
+<!-- ============ 06 · SIMULATION METHODOLOGY ============ -->
+<section class="sec wrap" id="sim">
+  <div class="head">
+    <p class="eyebrow">07 · Simulation methodology</p>
+    <h2>Grasshopper plans, Motion Stack moves, Isaac Sim checks</h2>
+    <p class="lead">Each tool does the part it is best at, and the same plan files pass between them. Grasshopper plans the build, Motion Stack (the Space Robotics Lab’s ROS 2 software for the MoonBots) turns the plan into joint commands, and Isaac Sim runs those commands with physics. The measured result goes back to the design model.</p>
+  </div>
+  <figure class="fig diagram">
+    <svg viewBox="0 0 1240 330" role="img" aria-label="Simulation pipeline: Rhino and Grasshopper planner, plan files, ROS 2 Motion Stack, Isaac Sim with physics, measurement back to the model">
+      <defs><marker id="mb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#A0A7B3"/></marker></defs>
+      <g font-family="IBM Plex Mono, monospace">
+        <g transform="translate(0,30)"><rect width="270" height="190" fill="#131923" stroke="#232A37"/><text x="16" y="28" fill="#E88A6F" font-size="12">RHINO 8 · GRASSHOPPER</text><text x="16" y="56" fill="#E6E4DE" font-size="13">design model (blocks)</text><text x="16" y="78" fill="#E6E4DE" font-size="13">planner: sequence, IK,</text><text x="16" y="98" fill="#E6E4DE" font-size="13">stations, routes</text><text x="16" y="130" fill="#A0A7B3" font-size="11">sliders: blocks, yard side,</text><text x="16" y="146" fill="#A0A7B3" font-size="11">speed, time · renders</text><text x="16" y="176" fill="#7C9CF2" font-size="11">status: working</text></g>
+        <g transform="translate(320,60)"><rect width="190" height="130" fill="#1d1712" stroke="#E88A6F"/><text x="16" y="28" fill="#E88A6F" font-size="12">PLAN FILES</text><text x="16" y="56" fill="#E6E4DE" font-size="13">assembly_plan.csv</text><text x="16" y="78" fill="#E6E4DE" font-size="13">timeline.json</text><text x="16" y="108" fill="#A0A7B3" font-size="11">jobs · poses · joints</text></g>
+        <g transform="translate(560,30)"><rect width="300" height="190" fill="#131923" stroke="#232A37"/><text x="16" y="28" fill="#E88A6F" font-size="12">ROS 2 · MOTION STACK</text><text x="16" y="56" fill="#E6E4DE" font-size="13">joint manager: 7 joints</text><text x="16" y="78" fill="#E6E4DE" font-size="13">per limb, wheel speeds</text><text x="16" y="100" fill="#E6E4DE" font-size="13">kinematic manager: IK</text><text x="16" y="130" fill="#A0A7B3" font-size="11">ROS 2 over Zenoh · virtual</text><text x="16" y="146" fill="#A0A7B3" font-size="11">robot when not on hardware</text><text x="16" y="176" fill="#7C9CF2" font-size="11">status: next step</text></g>
+        <g transform="translate(910,30)"><rect width="330" height="190" fill="#131923" stroke="#232A37"/><text x="16" y="28" fill="#E88A6F" font-size="12">NVIDIA ISAAC SIM</text><text x="16" y="56" fill="#E6E4DE" font-size="13">Dragon USD + blocks</text><text x="16" y="78" fill="#E6E4DE" font-size="13">PhysX: grasp, contact,</text><text x="16" y="100" fill="#E6E4DE" font-size="13">stacking, wheel–ground</text><text x="16" y="130" fill="#A0A7B3" font-size="11">kinematic playback: blocks done</text><text x="16" y="146" fill="#A0A7B3" font-size="11">ROS 2 bridge: working (Windows)</text><text x="16" y="176" fill="#7C9CF2" font-size="11">physics build: in progress</text></g>
+        <g stroke="#A0A7B3" stroke-width="1.3" marker-end="url(#mb)"><line x1="272" y1="125" x2="316" y2="125"/><line x1="512" y1="125" x2="556" y2="125"/><line x1="862" y1="125" x2="906" y2="125"/></g>
+        <path d="M1075,222 L1075,290 L135,290 L135,224" fill="none" stroke="#7C9CF2" stroke-width="1.3" stroke-dasharray="6 5" marker-end="url(#mb)"/>
+        <text x="605" y="314" fill="#7C9CF2" font-size="12" text-anchor="middle">measured block poses, contact forces and failures go back into the model · the plan is re-run</text>
+      </g>
+    </svg>
+  </figure>
+  <div class="cols3">
+    <div><h3>1 · Plan in Grasshopper</h3><p>The design model and the planner sit in one Grasshopper definition. A Python component holds the Dragon’s kinematics, taken from the lab’s robot model and checked against it to within 0.0 mm. Sliders set how many blocks to plan, which side the stock yard is on, and the playback speed. Moving the time slider shows the robot at any moment. A Bake button writes the job list and the timeline.</p></div>
+    <div><h3>2 · Command through Motion Stack</h3><p>Motion Stack is the open-source ROS 2 software the lab runs on the MoonBots (Neppel et al., 2025). Its joint and kinematic managers take joint targets per limb, and its orchestration swaps in a virtual robot when no hardware is attached. Next step: read timeline.json into Motion Stack, so the same commands drive the simulated Dragon and later the real one.</p></div>
+    <div><h3>3 · Check in Isaac Sim</h3><p>Isaac Sim runs the Dragon and the blocks with physics: grasp, contact, seating a block on its neighbours, wheels on the ground. The Isaac Sim ↔ ROS 2 link works, and the kinematic playback already moves the blocks; the robot’s own playback is still being fixed. The full physics build is the open work: the first runs tipped the robot and lost blocks from the gripper. The next round fixes the gripper contact and the robot’s balance on its wheels.</p></div>
+  </div>
+</section>
+<!-- ============ LITERATURE ============ -->
+<section class="sec wrap" id="lit">
+  <div class="head">
+    <p class="eyebrow">08 · Literature review</p>
+    <h2>Where this work sits: BIM, robots and dry-stacked structures</h2>
+    <p class="lead">Two recent reviews frame the field. Yue et al. (2025) sort BIM–robot research into task planning, assembly, printing and inspection, linked in four layers. Odugu et al. (2025) find that most systems still pass BIM to the robot one way, with little real-time feedback. Moonwalk joins three threads that are rarely combined: 4D BIM turned into robot jobs, assembly order for dry-stacked shells, and lunar construction with a modular robot.</p>
+  </div>
+  <div class="lit">
+    <div class="theme">
+      <h3>1 · Reviews and frameworks</h3>
+      <ul>
+        <li><b>Yue, Wang, Zhao, Lai, Huang (2025)</b> Interactions between BIM and robotics: towards intelligent construction engineering and management. <i>Computers in Industry</i> 169, 104299. <a href="https://doi.org/10.1016/j.compind.2025.104299">doi</a><span class="rel">framework · data loop</span></li>
+        <li><b>Odugu, Ghafari, Shourangiz, Khan, Wang (2025)</b> BIM-driven robotics in construction: a systematic review of integration methods, applications and future directions. <i>Journal of Intelligent Construction</i> 3(4). <a href="https://doi.org/10.26599/JIC.2025.9180103">doi</a><span class="rel">integration methods</span></li>
+        <li><b>Zhang, Luo, Xu (2022)</b> Towards fully BIM-enabled building automation and robotics: a perspective of lifecycle information flow. <i>Computers in Industry</i> 135, 103570. <a href="https://doi.org/10.1016/j.compind.2021.103570">doi</a><span class="rel">BIM for robots (BIMfAR)</span></li>
+      </ul>
+    </div>
+    <div class="theme">
+      <h3>2 · From BIM and 4D BIM to robot tasks</h3>
+      <ul>
+        <li><b>Oyediran, Turner, Kim, Barrows (2025)</b> Integration of 4D BIM and robot task planning: action-level simulation of indoor wall frame installation. <i>ITcon</i> 30, 352–374. <a href="https://doi.org/10.36680/j.itcon.2025.015">doi</a><span class="rel">closest to this pipeline: 4D BIM → ROS → simulation</span></li>
+        <li><b>Kim, Peavy, Huang, Kim (2021)</b> Development of BIM-integrated construction robot task planning and simulation system. <i>Automation in Construction</i> 127, 103720. <a href="https://doi.org/10.1016/j.autcon.2021.103720">doi</a><span class="rel">task planning · simulation</span></li>
+        <li><b>Kim, Peavy (2022)</b> BIM-based semantic building world modeling for robot task planning and execution. <i>Automation in Construction</i> 138, 104247. <a href="https://doi.org/10.1016/j.autcon.2022.104247">doi</a><span class="rel">world model from BIM</span></li>
+        <li><b>Brinkhoff, Kolani (2024)</b> Deriving fabrication information from BIM for automated robotic task planning. <i>35th Forum Bauinformatik</i>, 188–195. <a href="https://doi.org/10.15480/882.13543">doi</a><span class="rel">IFC → ROS · bricklaying</span></li>
+        <li><b>Karimi, Braga, Iordanova, St-Onge (2021)</b> Semantic optimal robot navigation using building information on construction sites. <i>ISARC 2021</i>, 57–64. <a href="https://doi.org/10.22260/ISARC2021/0010">doi</a><span class="rel">IFC → ROS navigation</span></li>
+      </ul>
+    </div>
+    <div class="theme">
+      <h3>3 · Digital twins, ROS and simulation</h3>
+      <ul>
+        <li><b>Wang, Yu, McGee, Menassa, Kamat (2024)</b> Enabling BIM-driven human-robot collaborative construction workflows with closed-loop digital twins. <i>Computers in Industry</i> 161, 104112. <a href="https://doi.org/10.1016/j.compind.2024.104112">doi</a><span class="rel">as-built written back to BIM</span></li>
+        <li><b>Liang, McGee, Menassa, Kamat (2020)</b> Bi-directional communication bridge for state synchronization between digital twin simulations and physical construction robots. <i>ISARC 2020</i>. <a href="https://www.iaarc.org/publications/2020_proceedings_of_the_37th_isarc/bi_directional_communication_bridge_for_state_synchronization_between_digital_twin_simulations_and_physical_construction_robots.html">link</a><span class="rel">sim ↔ robot sync</span></li>
+        <li><b>Xu, Zhu, Xu, Shao, Zhang, Zhang (2025)</b> FEM-based real-time task planning for robotic construction simulation. <i>Automation in Construction</i> 170, 105935. <a href="https://doi.org/10.1016/j.autcon.2024.105935">doi</a><span class="rel">stability checked at every step</span></li>
+        <li><b>Richard, Kamohara, Uno, Santra, van der Meer, Olivares-Mendez, Yoshida (2024)</b> OmniLRS: a photorealistic simulator for lunar robotics. <i>IEEE ICRA 2024</i>. <a href="https://arxiv.org/abs/2309.08997">arXiv</a><span class="rel">Isaac Sim lunar terrain · same lab</span></li>
+        <li><b>Neppel, Karimov, Mishra, Diaz, Gozbasi, Santra, Uno, Yoshida (2025)</b> Designing for distributed heterogeneous modularity: software architecture and deployment of MoonBots. <a href="https://arxiv.org/abs/2511.01437">arXiv</a><span class="rel">Motion Stack · ROS 2</span></li>
+      </ul>
+    </div>
+    <div class="theme">
+      <h3>4 · Assembly order for dry-stacked shells and blocks</h3>
+      <ul>
+        <li><b>Parascho, Han, Beghini, Miki, Walker, Bruun, Adriaenssens (2020)</b> LightVault: a design and robotic fabrication method for complex masonry structures. <i>Advances in Architectural Geometry 2020</i>. <a href="https://oar.princeton.edu/bitstream/88435/pr1s17ss4d/1/parascho%20et%20al.%20-%202021%20-%20lightvault%20a%20design%20and%20robotic%20fabrication%20method%20for%20complex%20masonry%20structures.pdf">pdf</a><span class="rel">vault built by robots, no falsework</span></li>
+        <li><b>Bruun, Pastrana, Paris, Beghini, Pizzigoni, Parascho, Adriaenssens (2021)</b> Three cooperative robotic fabrication methods for the scaffold-free construction of a masonry arch. <i>Automation in Construction</i> 129, 103803. <a href="https://doi.org/10.1016/j.autcon.2021.103803">doi</a><span class="rel">robots as temporary supports · fits the doorway arch</span></li>
+        <li><b>Kao, Körner, Sonntag, Nguyen, Menges, Knippers (2017)</b> Assembly-aware design of masonry shell structures. <i>IASS 2017</i>. <a href="https://structurae.info/litterature/papier-de-conference/assembly-aware-design-of-masonry-shell-structures-a-computational-approach">link</a><span class="rel">less falsework by design</span></li>
+        <li><b>Huang, Garrett, Ting, Parascho, Mueller (2021)</b> Robotic additive construction of bar structures: unified sequence and motion planning. <i>Construction Robotics</i>. <a href="https://arxiv.org/abs/2105.11438">arXiv</a><span class="rel">order + motion planned together</span></li>
+        <li><b>Wang, Liu, Wang, Vallat, Shi, Parascho, Kamgarpour (2025)</b> Learning to assemble with alternative plans. <i>ACM Transactions on Graphics</i> 44(4). <a href="https://doi.org/10.1145/3730824">doi</a><span class="rel">re-planning the order online</span></li>
+        <li><b>Johns, Wermelinger, Mascaro, Hutter et al. (2023)</b> A framework for robotic excavation and dry stone construction using on-site materials. <i>Science Robotics</i> 8(84). <a href="https://doi.org/10.1126/scirobotics.abp9758">doi</a><span class="rel">dry stacking from local material</span></li>
+        <li><b>Nagpal, Mehr (2023)</b> Optimal robotic assembly sequence planning (ORASP). <a href="https://arxiv.org/abs/2310.17115">arXiv</a><span class="rel">sequencing for space structures</span></li>
+      </ul>
+    </div>
+    <div class="theme">
+      <h3>5 · Lunar construction and ISRU blocks</h3>
+      <ul>
+        <li><b>Uno, Neppel, Diaz et al., Yoshida (2025)</b> MoonBot: modular and on-demand reconfigurable robot toward Moon base construction. <i>IEEE Transactions on Field Robotics</i>. <a href="https://doi.org/10.1109/TFR.2025.3624346">doi</a><span class="rel">the robot of this work</span></li>
+        <li><b>Dyskin, Estrin, Pasternak, Khor, Kanel-Belov (2005)</b> The principle of topological interlocking in extraterrestrial construction. <i>Acta Astronautica</i> 57(1), 10–21. <a href="https://doi.org/10.1016/j.actaastro.2004.12.005">doi</a><span class="rel">mortar-free interlocking</span></li>
+        <li><b>NASA KSC and Sidus Space</b> Lunar landing pads: interlocking pavers (KSC-TOPS-89, US Patent 10,920,377). <a href="https://technology.nasa.gov/patent/KSC-TOPS-89">link</a><span class="rel">interlocking pad pavers</span></li>
+        <li><b>Clinton, Edmunson, Effinger et al. (2022)</b> NASA’s Moon-to-Mars Planetary Autonomous Construction Technology project. <i>IAC 2022</i>. <a href="https://ntrs.nasa.gov/citations/20220013524">NTRS</a><span class="rel">pads first, robot-built</span></li>
+        <li><b>Peters, Cheung, Kostitsyna (2025)</b> Assembly order planning for modular structures by autonomous multi-robot systems. <i>IEEE ICRA 2025</i>. <a href="https://doi.org/10.1109/ICRA55743.2025.11127644">doi</a><span class="rel">assembly order · NASA ARMADAS</span></li>
+        <li><b>Imhof, Sperl, Weiss et al. (2018)</b> Using solar sintering to build infrastructure on the Moon: RegoLight. <i>IAC 2018</i>. <a href="https://iafastro.directory/iac/archive/browse/IAC-18/E5/1/47746/">link</a><span class="rel">sintered regolith blocks</span></li>
+      </ul>
+    </div>
+  </div>
+  <div class="gap">
+    <h3>The gap this work fills</h3>
+    <p>BIM-to-robot work so far is mostly indoor and on Earth: walls, drywall, bricklaying, with industrial or mobile manipulators. Dry-stacked shell research plans the order and the support, but for fixed arms beside the structure. Lunar construction studies set the goals, pads first and then shelters, with little detail on how a robot sequences discrete blocks. Moonwalk combines the three for one modular robot. A 4D BIM model becomes a job list with an order that respects dry stacking, collision-free routes for a mobile robot working inside the structure it builds, and an execution and feedback path through Motion Stack and Isaac Sim.</p>
+  </div>
+</section>
+
+<!-- ============ CONFERENCES ============ -->
+<section class="sec wrap" id="conf">
+  <div class="head">
+    <p class="eyebrow">09 · Where to present</p>
+    <h2>Conferences and deadlines</h2>
+    <p class="lead">Open calls after 19 October 2026, nearest first. Dates marked “est.” are estimated from the previous edition and need checking when the call is published.</p>
+  </div>
+  <div class="tblwrap"><table class="tbl conf">
+    <thead><tr><th>Deadline</th><th>Conference</th><th>When and where</th><th>Fit for this work</th></tr></thead>
+    <tbody>
+      <tr class="soon"><td>16 Nov 2026 · abstract</td><td><a href="https://ices.space/call-for-papers/">ICES 2027</a></td><td>18–22 Jul 2027 · St. Louis, USA</td><td>Space architecture (ICES502), regolith ISRU (ICES308)</td></tr>
+      <tr class="soon"><td>7 Dec 2026 · abstract<br>14 Dec · paper</td><td><a href="https://icaps27.icaps-conference.org/">ICAPS 2027</a></td><td>27 Jun–2 Jul 2027 · Columbia, USA</td><td>Assembly and 4D planning as a planning problem; PlanRob workshop (est. Mar 2027)</td></tr>
+      <tr class="soon"><td>17 Dec 2026 · abstract</td><td><a href="https://ists.ne.jp/">ISTS 2027</a></td><td>17–23 Jul 2027 · Toyama, Japan</td><td>Japan’s main space symposium; natural venue with the Tohoku lab</td></tr>
+      <tr><td>15 Jan 2027 · abstract<br>1 Apr · full paper</td><td><a href="https://www.aalto.fi/en/events/ecaade2027-conference-symbiotic-ecologies-designing-across-species-data-and-time">eCAADe 2027</a></td><td>23–27 Aug 2027 · Espoo, Finland</td><td>Computational design, Grasshopper, 4D BIM</td></tr>
+      <tr><td>~ mid/late Jan 2027 · paper (est.)</td><td><a href="https://www.iaarc.org">ISARC 2027</a></td><td>summer 2027 · Odense, Denmark</td><td>Construction robotics, BIM, digital twins: the best fit for the method</td></tr>
+      <tr><td>~ late Feb / early Mar 2027 · abstract (est.)</td><td><a href="https://www.iafastro.org">IAC 2027</a></td><td>27 Sep–1 Oct 2027 · Poznań, Poland</td><td>Lunar infrastructure, space architecture (E5), building blocks (D3)</td></tr>
+      <tr><td>1 Mar 2027 · paper</td><td><a href="https://2027.ieee-iros.org/">IEEE IROS 2027</a></td><td>26 Sep–1 Oct 2027 · Florence, Italy</td><td>Modular robots, assembly, simulation; with the lab</td></tr>
+      <tr><td>~ Mar 2027 · abstract (est.)</td><td><a href="https://www.cibw78.org/">CIB W78 2027</a></td><td>2027, host to be announced</td><td>BIM and IT in construction</td></tr>
+      <tr><td>~ Apr–May 2027 · paper (est.)</td><td><a href="https://www.acadia.org">ACADIA 2027</a></td><td>2027, host to be announced</td><td>Architecture and robotics</td></tr>
+      <tr><td>call not yet published</td><td><a href="https://www.spaceresourcesweek.lu/">Space Resources Week 2027</a></td><td>10–13 May 2027 · Luxembourg</td><td>ISRU and lunar construction industry; VR demo and model</td></tr>
+      <tr><td>~ mid 2027 · for 2028 (est.)</td><td><a href="https://www.asce.org/education-and-events/events/meetings/earth-and-space-2026">ASCE Earth &amp; Space 2028</a></td><td>2028, every two years</td><td>Lunar construction, regolith, robotics</td></tr>
+      <tr><td>~ Sep 2027 · for 2028 (est.)</td><td><a href="https://robotsinarchitecture.org">Rob|Arch 2028</a></td><td>2028, every two years</td><td>Robots in architecture</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Already closed for 2027: ICRA 2027 (papers closed 16 Sep 2026), CAADRIA 2027, CAAD Futures 2027, IEEE Aerospace 2027, AIAA ASCEND 2027. Worth attending this year without a paper: i-SAIRAS + iSpaRo, 3–6 Nov 2026, Cologne.</p>
+</section>
+
+<section class="sec wrap" id="sources" style="padding-top:0">
+  <p class="eyebrow">Sources</p>
+  <p class="sources">
+  ispace, <a href="https://www.ispace-inc.com/mission-4/">Mission 4</a> ·
+  ispace, <a href="https://ispace-inc.com/wp-content/uploads/2026/03/20260330-Mission-Timeline.pdf">mission timeline update, 30 March 2026</a> ·
+  ispace, <a href="https://www.ispace-inc.com/2026/08/07/ispace-receives-grant-for-japans-space-strategy-fund-project-high-precision-landing-technology-in-the-lunar-poles-region/">Space Strategy Fund grant, 7 August 2026</a> ·
+  MEXT, <a href="https://www.mext.go.jp/content/20250311-mxt_uchukai01-000040831_5.pdf">Space Strategy Fund, lunar polar high-precision landing theme</a> (≤ 100 m accuracy) ·
+  Neppel et al., <a href="https://arxiv.org/abs/2511.01437v1">Designing for Distributed Heterogeneous Modularity: On Software Architecture and Deployment of MoonBots</a> (Motion Stack, <a href="https://github.com/2lian/Motion-Stack">github.com/2lian/Motion-Stack</a>) ·
+  Uno et al., MoonBot, IEEE Transactions on Field Robotics, 2025, DOI 10.1109/TFR.2025.3624346 ·
+  candidate regions and crater positions: Report 02 (NASA Artemis III regions, 2022 and 2024 lists; positions approximate).
+  The ≥ 87°S landing latitude is as given by the professor; the public ispace and Space Strategy Fund documents above do not state a latitude.
+  </p>
+</section>
+<footer class="wrap">Moonwalk 2.0 · Report 04 · Nina Velimirović · Tohoku University Space Robotics Laboratory, October 2026 · Robot: MoonBot Dragon (dragon_v2), kinematics from the lab model · Assembly plans: Grasshopper planner (moonwalk_gh) · Previous: <a href="https://arhimatrix.github.io/arhimatrix-moonwalk-2-rep_03/">Report 03</a></footer>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script>
+(function(){
+'use strict';
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function $(id){return document.getElementById(id)}
+/* ---------- hero: from the whole Moon down to the base site (site analysis) ---------- */
+var LUNAR_R=1737.4, KM_DEG=LUNAR_R*Math.PI/180;
+var SITE_DATA={ // lat (deg, south negative), lon (deg east), diameter km. Positions approximate, from published polar maps.
+  craters:[['shack','Shackleton',-89.67,129.8,21],['gerl','de Gerlache',-88.5,-87.1,32],['shoe','Shoemaker',-88.1,44.9,51],['faus','Faustini',-87.3,77,39],
+    ['haw','Haworth',-87.45,-5,35],['sverd','Sverdrup',-88.5,-152,33],['nob','Nobile',-85.2,53.5,73],['cab','Cabeus',-85.3,-42.1,98]],
+  peaks:[['mal','Malapert massif',-86.0,2.9]],
+  ridge:[[-89.82,-150],[-89.46,-99],[-89.02,-90.4]], // Shackleton rim → de Gerlache rim, the "connecting ridge" (indicative line)
+  base:[-89.46,-99],
+  cands:[ // NASA Artemis III candidate regions (15 x 15 km each). Centres approximate. Scores: first-pass, qualitative (3 good, 2 fair, 1 weak).
+    {id:'cr',name:'Connecting Ridge',lat:-89.46,lon:-99,poleKm:16,iceKm:5,n22:true,n24:false,
+      s:{light:3,ice:3,flat:1,slope:2,earth:1,nasa:1},
+      t:{light:'Among the most-lit ground at the pole',ice:'Shackleton\u2019s shadowed floor right beside it',flat:'Narrow crest, little room for a pad',slope:'Gentle along the crest, steep into Shackleton',earth:'Earth low, often below the horizon',nasa:'On the 2022 list, dropped in 2024'}},
+    {id:'dg2',name:'de Gerlache Rim 2',lat:-88.7,lon:-68,poleKm:39,iceKm:8,n22:true,n24:true,
+      s:{light:3,ice:3,flat:2,slope:2,earth:1,nasa:3},
+      t:{light:'High rim at the end of the same ridge system',ice:'de Gerlache\u2019s shadowed floor next to the rim',flat:'Wider rim terrain than the crest',slope:'Rim gentle, crater wall steep',earth:'Earth low on this side of the pole',nasa:'On the current 2024 list'}},
+    {id:'mal',name:'Malapert Massif',lat:-86.0,lon:2.9,poleKm:121,iceKm:30,n22:true,n24:true,
+      s:{light:2,ice:1,flat:2,slope:1,earth:3,nasa:3},
+      t:{light:'High massif, long periods of sun',ice:'Larger shadowed floors tens of km away',flat:'Some level ground on and below the massif',slope:'Steep massif flanks',earth:'Faces the Earth: the best direct link',nasa:'On the current 2024 list'}},
+    {id:'nob1',name:'Nobile Rim 1',lat:-85.4,lon:40,poleKm:139,iceKm:10,n22:true,n24:true,
+      s:{light:2,ice:3,flat:2,slope:2,earth:2,nasa:3},
+      t:{light:'Lit rim, less than the ridges nearer the pole',ice:'Nobile\u2019s shadowed floor; the region VIPER was sent to study',flat:'Moderate rim plains',slope:'Moderate',earth:'Earth visible part of the time',nasa:'On the current 2024 list'}}
+  ] };
+(function(){
+  var canvas=$('moon'); if(!canvas) return; var story=$('story'), stage=canvas.parentElement;
+  var steps=[].slice.call(document.querySelectorAll('#steps .step')), rail=$('rail'), coords=$('coords');
+  steps.forEach(function(s,i){ var b=document.createElement('button'); b.type='button'; b.innerHTML='<span>'+s.dataset.label+'</span>'; b.setAttribute('aria-label','Go to '+s.dataset.label);
+    b.addEventListener('click',function(){ window.scrollTo({top:story.offsetTop+s.offsetTop+(i?s.offsetHeight*0.35:0),behavior:reduce?'auto':'smooth'}); }); rail.appendChild(b); });
+  var railBtns=[].slice.call(rail.children);
+  if(!window.THREE) return;
+  var renderer=new THREE.WebGLRenderer({canvas:canvas,antialias:true,alpha:true}); renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+  renderer.outputEncoding=THREE.sRGBEncoding; renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.0;
+  var scene=new THREE.Scene(), camera=new THREE.PerspectiveCamera(32,1,0.002,200), R=1.6, KM=R/LUNAR_R;
+  var loader=new THREE.TextureLoader(), src=window.MOON_TEX||{map:'img/moon.jpg',nrm:'img/moon_n.jpg'};
+  var map=loader.load(src.map); map.encoding=THREE.sRGBEncoding; map.anisotropy=renderer.capabilities.getMaxAnisotropy();
+  var nmap=loader.load(src.nrm); nmap.anisotropy=map.anisotropy;
+  var moon=new THREE.Mesh(new THREE.SphereGeometry(R,256,160),new THREE.MeshStandardMaterial({map:map,normalMap:nmap,normalScale:new THREE.Vector2(1.6,1.6),roughness:1,metalness:0}));
+  var tilt=new THREE.Group(); tilt.add(moon); scene.add(tilt);
+  function dir(lat,lon){ var u=(lon+180)/360, ph=u*Math.PI*2, th=(90-lat)*Math.PI/180; return new THREE.Vector3(-Math.cos(ph)*Math.sin(th),Math.cos(th),Math.sin(ph)*Math.sin(th)); }
+  function ll(lat,lon,h){ return dir(lat,lon).multiplyScalar(R*(h||1.0015)); }
+  function circle(lat,lon,rKm,h,n){ var c=dir(lat,lon), u=new THREE.Vector3(0,1,0).cross(c); if(u.lengthSq()<1e-8) u.set(1,0,0); u.normalize(); var w=c.clone().cross(u), al=rKm/LUNAR_R, out=[];
+    for(var i=0;i<=n;i++){ var t=i/n*Math.PI*2; out.push(c.clone().multiplyScalar(Math.cos(al)).addScaledVector(u,Math.sin(al)*Math.cos(t)).addScaledVector(w,Math.sin(al)*Math.sin(t)).normalize().multiplyScalar(R*h)); } return out; }
+  var anchors={}; var baseO=new THREE.Object3D(); baseO.position.copy(ll(SITE_DATA.base[0],SITE_DATA.base[1])); moon.add(baseO); anchors.base=baseO;
+  var pole=new THREE.Object3D(); pole.position.copy(ll(-90,0)); moon.add(pole);
+  var ring87=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(circle(-90,0,3*KM_DEG,1.0035,256),true),512,R*0.0016,6,true),new THREE.MeshBasicMaterial({color:0xE88A6F,transparent:true,opacity:0})); moon.add(ring87);
+  var CANDS=SITE_DATA.cands.map(function(c){ var o=new THREE.Object3D(); o.position.copy(ll(c.lat,c.lon)); moon.add(o); return [c.id,o]; });
+  var rlab=new THREE.Object3D(); rlab.position.copy(ll(-87,125)); moon.add(rlab); CANDS.push(['ring',rlab]);
+  var sun=new THREE.DirectionalLight(0xfff6ea,2.6); scene.add(sun); scene.add(new THREE.AmbientLight(0x6f7c96,0.10)); scene.add(new THREE.HemisphereLight(0x9fb0d0,0x000000,0.06));
+  var rr=(function(s){return function(){s=(s*16807)%2147483647;return (s-1)/2147483646;};})(11), sg=new THREE.BufferGeometry(), pts=[], cols=[];
+  for(var i=0;i<1800;i++){ var th=rr()*Math.PI*2, ph=Math.acos(2*rr()-1), d=80; pts.push(d*Math.sin(ph)*Math.cos(th),d*Math.sin(ph)*Math.sin(th),d*Math.cos(ph)); var b=0.5+rr()*0.5; cols.push(b,b,b*1.05); }
+  sg.setAttribute('position',new THREE.Float32BufferAttribute(pts,3)); sg.setAttribute('color',new THREE.Float32BufferAttribute(cols,3));
+  scene.add(new THREE.Points(sg,new THREE.PointsMaterial({size:0.18,vertexColors:true,transparent:true,opacity:.85,sizeAttenuation:true})));
+  var Wd=1,Ht=1,narrow=false; function size(){ Wd=stage.clientWidth; Ht=stage.clientHeight; renderer.setSize(Wd,Ht,false); camera.aspect=Wd/Ht; camera.updateProjectionMatrix(); narrow=Wd<760; }
+  addEventListener('resize',size); size();
+  function clamp(x,a,b){return Math.max(a,Math.min(b,x));} function seg(p,a,b){var t=clamp((p-a)/(b-a),0,1); return t*t*(3-2*t);} function lerp(a,b,t){return a+(b-a)*t;}
+  var t0=performance.now(), v=new THREE.Vector3(), camDir=new THREE.Vector3(), target=new THREE.Vector3();
+  function progress(){ var h=story.offsetHeight-stage.clientHeight; return clamp((scrollY-story.offsetTop)/Math.max(h,1),0,1); }
+  function frame(now){
+    var pr=progress(); if(pr>=1&&!reduce&&story.getBoundingClientRect().bottom<0){ requestAnimationFrame(frame); return; } var NS=steps.length, p=Math.min(1,pr*NS/(NS-1)), rz=seg(pr,(NS-1.15)/NS,(NS-0.75)/NS);
+    var a=seg(p,0.07,0.24), z=seg(p,0.25,0.40), z2=seg(p,0.41,0.52), dv=0;
+    var h1=seg(p,0.55,0.60)*(1-seg(p,0.69,0.73)), h2=seg(p,0.69,0.73)*(1-seg(p,0.83,0.87)), h3=seg(p,0.83,0.87);
+    if(dataReady){ var fd=1-0.8*rz; dataCaps[0].material.opacity=h1*fd; dataCaps[1].material.opacity=h2*fd; dataCaps[2].material.opacity=h3*fd; }
+    var dv2=0, dv3=0; var diveEl=null, d2=null, d3=null; if(diveEl){ diveEl.style.opacity=dv; diveEl.firstElementChild.style.transform='none'; } if(d2){ d2.style.opacity=seg(p,0.85,0.90); d2.firstElementChild.style.transform='scale('+(1+2.6*dv2*dv2)+')'; } 
+    var spin=reduce?0:(now-t0)*0.000035*(1-a);
+    moon.rotation.y=-Math.PI/2+spin*(1-a)+lerp(0,0.9,a);
+    tilt.rotation.x=lerp(0.08,-Math.PI/2+0.42,a); tilt.rotation.z=lerp(0,0.25,a);
+    var off=narrow?0:lerp(0.95,0.55,a)*(1-z); tilt.position.set(off,narrow?-0.35*(1-z):0,0); tilt.updateMatrixWorld(true);
+    var poleW=new THREE.Vector3(), baseW=new THREE.Vector3(); pole.getWorldPosition(poleW); anchors.base.getWorldPosition(baseW);
+    var focus=poleW.clone();
+    target.set(off,narrow?-0.35*(1-z):0,0).lerp(focus,z);
+    var dist=lerp(narrow?7.6:6.4,narrow?1.0:0.8,z); dist=lerp(dist,narrow?0.95:0.62,z2);
+    var nF=focus.clone().sub(tilt.position).normalize();
+    camDir.set(0,0,1).lerp(nF.clone().add(new THREE.Vector3(0,-0.55,0.55)).normalize(),z).normalize();
+    camera.position.copy(target).addScaledVector(camDir,dist); camera.lookAt(target);
+    var tg=new THREE.Vector3().crossVectors(nF,new THREE.Vector3(0,0,1)).normalize(), el0=lerp(0.6,0.10,z), graze=tg.multiplyScalar(Math.cos(el0)).addScaledVector(nF,Math.sin(el0)).multiplyScalar(6);
+    sun.position.set(4,1.2,3.2).lerp(graze,a);
+    ring87.material.opacity=rz; ring87.visible=rz>0.01; var bpE=$('basePin'); if(bpE) bpE.style.visibility=rz>0.4?'hidden':'visible'; var ssE=$('secstrip'); if(ssE&&rz>0.01) ssE.style.opacity=Math.max(h1,h2,h3)*(1-rz);
+    CANDS.forEach(function(c){ var el=$('pc-'+c[0]); if(!el) return; el.style.opacity=rz; if(rz>0.02){ var w=new THREE.Vector3(); c[1].getWorldPosition(w); var pv=w.project(camera); el.style.transform='translate('+((pv.x*0.5+0.5)*Wd).toFixed(1)+'px,'+((-pv.y*0.5+0.5)*Ht).toFixed(1)+'px)'; } });
+    renderer.render(scene,camera);
+    var sp=$('secstrip'); if(sp){ var mm=Math.max(h1,h2,h3); sp.style.opacity=mm*(1-rz); sp.children[0].style.opacity=h1>0.5?1:0; sp.children[1].style.opacity=h2>0.5?1:0; sp.children[2].style.opacity=h3>0.5?1:0; }
+    var bp=$('basePin'); if(bp){ var bo=clamp(h1+h2+h3,0,1)*(1-rz); bp.style.opacity=bo; if(bo>0.02){ var pv=baseW.clone().project(camera); bp.style.transform='translate('+((pv.x*0.5+0.5)*Wd).toFixed(1)+'px,'+((-pv.y*0.5+0.5)*Ht).toFixed(1)+'px)'; } }
+    var cur=Math.min(steps.length-1,Math.floor(pr*steps.length*0.999)); railBtns.forEach(function(b,i){ b.classList.toggle('on',i===cur); });
+    var fh=2*dist*Math.tan(16*Math.PI/180)/R*LUNAR_R, rnd=fh>300?50:fh>60?10:5;
+    coords.textContent=rz>0.5?'ISPACE MISSION 4 · LANDING LATITUDE ≥ 87°S · ≈ 91 KM FROM THE POLE':h3>0.5?'DIVINER · MAX TEMPERATURE · SCHEMATIC':h2>0.5?'MAZARICO · AVERAGE ILLUMINATION · SCHEMATIC':h1>0.5?'LOLA · POLAR DEM · SCHEMATIC':z>0.5?'SOUTH POLE · FRAME HEIGHT ≈ '+(Math.round(fh/rnd)*rnd).toLocaleString('en-US')+' KM'+(z2>0.5?' · CONNECTING RIDGE':''):(a>0.5?'SOUTH POLAR REGION · VIEW FROM BELOW':'NEAR SIDE');
+    if(!reduce) requestAnimationFrame(frame); }
+  if(reduce){ addEventListener('scroll',function(){ requestAnimationFrame(frame); },{passive:true}); addEventListener('resize',function(){ requestAnimationFrame(frame); }); }
+  // --- site data layers: schematic proxies derived from the basemap polar band (replace with LOLA / Mazarico / Diviner rasters) ---
+  var dataCaps=[], dataReady=false, TH0=0.26;
+  function buildDataCaps(img){
+    var N=1024, src=document.createElement('canvas'); src.width=img.width; src.height=img.height; src.getContext('2d').drawImage(img,0,0);
+    var sd=src.getContext('2d').getImageData(0,0,img.width,img.height).data, W=img.width, H=img.height;
+    // sample brightness on a polar stereographic grid around the south pole: planar (u,v) -> lat/lon -> equirect pixel
+    var B=new Float32Array(N*N), R0=Math.sin(TH0);
+    for(var y=0;y<N;y++)for(var x=0;x<N;x++){ var px=(x/(N-1))*2-1, pz=(y/(N-1))*2-1, rho=Math.sqrt(px*px+pz*pz); if(rho>1){B[y*N+x]=-1;continue;}
+      var th=Math.asin(rho*R0), lat=-(Math.PI/2-th), lon=Math.atan2(pz,px); var u=(lon+Math.PI)/(2*Math.PI), v=(Math.PI/2-lat)/Math.PI; var ix=Math.min(W-1,u*W|0), iy=Math.min(H-1,v*H|0); var k=(iy*W+ix)*4; B[y*N+x]=(sd[k]*0.299+sd[k+1]*0.587+sd[k+2]*0.114)/255; }
+    // low-pass for a height proxy
+    function blur(a,r){ var o=new Float32Array(a.length); for(var y=0;y<N;y++)for(var x=0;x<N;x++){ var sum=0,n=0; for(var dy=-r;dy<=r;dy+=2)for(var dx=-r;dx<=r;dx+=2){ var xx=x+dx,yy=y+dy; if(xx<0||yy<0||xx>=N||yy>=N) continue; var v=a[yy*N+xx]; if(v<0) continue; sum+=v;n++; } o[y*N+x]=n?sum/n:-1; } return o; }
+    var Hm=blur(B,10); var lo=1,hi=0; for(var q=0;q<B.length;q++){ if(B[q]<0) continue; if(B[q]<lo) lo=B[q]; if(B[q]>hi) hi=B[q]; } function nz(v){ return (v-lo)/Math.max(1e-3,hi-lo); }
+    function ramp(stops){ return function(t){ t=Math.max(0,Math.min(1,t)); var i=Math.min(stops.length-2,Math.floor(t*(stops.length-1))), f=t*(stops.length-1)-i, a=stops[i],b=stops[i+1]; return [a[0]+(b[0]-a[0])*f,a[1]+(b[1]-a[1])*f,a[2]+(b[2]-a[2])*f]; }; }
+    var cElev=ramp([[27,42,107],[42,157,143],[233,196,106],[244,241,234]]), cLight=ramp([[18,10,42],[106,27,154],[230,81,0],[255,241,118]]);
+    function makeTex(fn){ var c=document.createElement('canvas'); c.width=c.height=N; var g=c.getContext('2d'), id=g.createImageData(N,N), d=id.data;
+      for(var i=0;i<N*N;i++){ var v=B[i]; if(v<0){ d[i*4+3]=0; continue; } var rgb=fn(i,v); d[i*4]=rgb[0]; d[i*4+1]=rgb[1]; d[i*4+2]=rgb[2]; d[i*4+3]=255; }
+      g.putImageData(id,0,0); var t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; t.anisotropy=4; return t; }
+    // elevation: height proxy + hillshade from its gradient
+    var tElev=makeTex(function(i,v){ var h=Hm[i], x=i%N, y=(i/N)|0, hx=(Hm[Math.min(N*N-1,i+2)]-Hm[Math.max(0,i-2)]), hy=(Hm[Math.min(N*N-1,i+2*N)]-Hm[Math.max(0,i-2*N)]); var sh=0.75+1.4*(hx*0.7-hy*0.7); var c=cElev(nz(h)); return [c[0]*sh,c[1]*sh,c[2]*sh]; });
+    var tLight=makeTex(function(i,v){ var l=Math.pow(nz(v),1.6); return cLight(l); });
+    var tCold=makeTex(function(i,v){ var n=nz(v), dark=n<0.33; var g=40+n*110; if(dark){ var k=1-n/0.33; return [30+40*(1-k),120+90*(1-k)*0.5,200+55*k]; } return [g,g,g+6]; });
+    [tElev,tLight,tCold].forEach(function(t){ var cg=new THREE.SphereGeometry(R*1.0012,128,32,0,Math.PI*2,Math.PI-TH0,TH0); var pa=cg.attributes.position, uv=cg.attributes.uv, Rr=R*1.0012*Math.sin(TH0);
+      for(var k=0;k<pa.count;k++){ uv.setXY(k,(pa.getX(k)/Rr+1)/2,(pa.getZ(k)/Rr+1)/2); } uv.needsUpdate=true;
+      var mm=new THREE.Mesh(cg,new THREE.MeshBasicMaterial({map:t,transparent:true,opacity:0,depthWrite:false})); moon.add(mm); dataCaps.push(mm); });
+    dataReady=true; }
+  map.onUpdate=function(){ if(reduce) requestAnimationFrame(frame); };
+  if(map.image&&map.image.width) buildDataCaps(map.image); else { var _ld=setInterval(function(){ if(map.image&&map.image.width){ clearInterval(_ld); buildDataCaps(map.image); } },200); }
+  requestAnimationFrame(frame);
+})();
+})();
+</script>
+<script src="player.js"></script>
+<script>
+(function(){
+  var made={};
+  function make(el){ if(made[el.id]) return; made[el.id]=1; new MoonwalkPlayer(el, el.dataset.plan, {mode:'detail', plinth:el.dataset.plinth||null}); }
+  var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting) make(e.target); }); },{rootMargin:'400px'});
+  document.querySelectorAll('.player').forEach(function(el){ io.observe(el); });
+  var links=[].slice.call(document.querySelectorAll('.nav a[href^="#"]'));
+  addEventListener('scroll',function(){ var cur=null; document.querySelectorAll('section[id],div.story').forEach(function(s){ if(s.getBoundingClientRect().top<=innerHeight*0.5) cur=s.id; });
+    links.forEach(function(a){ a.classList.toggle('on',a.getAttribute('href')==='#'+cur); }); },{passive:true});
+})();
+</script>
+</body>
+</html>
